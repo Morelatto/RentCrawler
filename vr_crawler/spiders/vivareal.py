@@ -26,6 +26,7 @@ class QuotesSpider(scrapy.Spider):
             loader.add_css('condo', 'strong.js-condo-price::text')
 
             loader.add_css('description', 'div.js-property-description::text')
+            loader.add_css('code', 'a.js-card-title::attr(href)')
             yield loader.load_item()
 
         next_page = response.css('a.js-change-page::attr(data-page)')[-1].extract()

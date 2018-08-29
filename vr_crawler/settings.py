@@ -9,6 +9,9 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko
 
 ROBOTSTXT_OBEY = False
 
+FEED_FORMAT = 'json'
+FEED_URI = 'results.json'
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
 
@@ -50,11 +53,9 @@ DOWNLOAD_DELAY = 0.5
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 # }
 
-# Configure item pipelines
-# See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    'vr_crawler.pipelines.VrCrawlerPipeline': 300,
-# }
+ITEM_PIPELINES = {
+   'vr_crawler.pipelines.ApartmentPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
