@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 from scrapy.pipelines.images import ImagesPipeline
+from vr_crawler.spiders.apartment_pictures import IMAGES_FOLDER
 
 import logging
+import os
 import scrapy
 import sqlite3
+
+INFO_FILE_NAME = 'info'
 
 logger = logging.getLogger(__name__)
 logger.setLevel('DEBUG')
@@ -47,9 +51,24 @@ class ApartmentPipeline:
 
 class ApartmentPicturesPipeline(ImagesPipeline):
     def file_path(self, request, response=None, info=None):
-        return '{}/{}.jpg'.format(request.meta['code'], request.meta['index'])
+        return '{}/{}/{}.jpg'.format(request.meta['district'], request.meta['code'], request.meta['index'])
 
     def get_media_requests(self, item, info):
         for i, img_url in enumerate(item['img_urls']):
-            meta = {'code': item['code'], 'index': i}
+            meta = {'code': item['code'], 'index': i, 'district': item['address']['district']}
             yield scrapy.Request(url=img_url, meta=meta)
+        self.create_info_file(item['address'], item['prices'], item['characteristics'], item['description'], item[
+            'code'])
+
+    @staticmethod
+    def create_info_file(address, prices, characteristics, description, code):
+        path = '{}/{}/{}'.format(IMAGES_FOLDER, address['district'], code)
+        os.makedirs(path, exist_ok=True)
+        with open('{}/{}.txt'.format(path, INFO_FILE_NAME), 'w+') as f:
+            f.write(str(address))
+            f.write('\n')
+            f.write(str(prices))
+            f.write('\n')
+            f.write(str(characteristics))
+            f.write('\n')
+            f.write(str(description))

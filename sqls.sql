@@ -19,6 +19,13 @@ from (select street, district, size, rooms, bathrooms, garages, rent, condo, ren
 where total < 2500
 order by size desc, total;
 
+select code
+from (select code, rent + condo as total
+      from apartments
+      where district in ('Vila Mariana', 'Jardim Paulista', 'Pinheiros', 'Bela Vista', 'Consolação', 'Higienópolis', 'Paraíso', 'Jardins', 'Aclimação', 'Cerqueira César', 'Jardim América', 'Jardim Europa', 'Chácara Klabin')
+      or district in ('Saúde', 'Vila Clementino', 'Santa Cecília', 'Centro', 'Liberdade', 'Jabaquara', 'Vila Guarani', 'Planalto Paulista', 'Sumaré', 'República'))
+where total < 2500;
+
 /*
 https://www.vivareal.com.br/imovel/apartamento-3-quartos-vila-mariana-zona-sul-sao-paulo-80m2-aluguel-RS2000-id-1040322520/
 https://www.vivareal.com.br/imovel/apartamento-2-quartos-consolacao-centro-sao-paulo-80m2-aluguel-RS1700-id-95007418/
@@ -33,3 +40,7 @@ https://www.vivareal.com.br/imovel/apartamento-2-quartos-vila-mariana-zona-sul-s
 https://www.vivareal.com.br/imovel/apartamento-2-quartos-bela-vista-centro-sao-paulo-68m2-aluguel-RS1500-id-1039913716/
 https://www.vivareal.com.br/imovel/apartamento-2-quartos-bela-vista-centro-sao-paulo-65m2-aluguel-RS1500-id-1037880264/
 */
+
+/*
+
+ */

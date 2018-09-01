@@ -25,6 +25,12 @@ parse_code = MapCompose(lambda url: url.split('id-')[-1][:-1])
 strip = MapCompose(str.strip)
 
 
+class Prices(Item):
+    rent = Field()
+    condo = Field()
+    iptu = Field()
+
+
 class Address(Item):
     street = Field()
     district = Field()
@@ -68,3 +74,10 @@ class AddressLoader(ItemLoader):
     street_out = parse_street
     district_out = parse_district
     city_out = parse_city
+
+
+class PricesLoader(ItemLoader):
+    default_item_class = Prices
+
+    default_input_processor = strip
+    default_output_processor = parse_currency
