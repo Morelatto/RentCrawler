@@ -3,20 +3,53 @@
 import logging
 import sqlite3
 
+logger = logging.getLogger(__name__)
+logger.setLevel('DEBUG')
+
 
 class ApartmentPipeline:
     def __init__(self):
-        self.db = r'apartments.sqlite'
+        self.db = r'apartments3.sqlite'
         self.table = 'apartments'
-        self.buff = list()
-        self.buff_size = 20
-        self.con = sqlite3.connect(self.db)
-        self.cur = self.con.cursor()
-        self.cur.execute(
+        self.connection = sqlite3.connect(self.db)
+        self.cursor = self.connection.cursor()
+        self.__create_table()
+
+    def process_item(self, item, _):
+        self.__insert(item)
+        self.connection.commit()
+        return item
+
+    def __insert(self, item):
+        values = (item.get('name'), item.get('address').get('street'), item.get('address').get('district'),
+                  item.get('address').get('city'), item.get('size'), item.get('rooms'), item.get('bathrooms'),
+                  item.get('garages'), item.get('rent'), item.get('condo'), item.get('description'), item.get('code'))
+        try:
+            self.cursor.execute("INSERT INTO {table} VALUES(?,?,?,?,?,?,?,?,?,?,?,?);".format(table=self.table), values)
+        except sqlite3.IntegrityError:
+            logger.warning('Updating item already on db: ' + item.get('code'))
+            self.cursor.execute('''UPDATE {table} SET 
+            name = ?, 
+            street = ?, 
+            district = ?, 
+            city = ?, 
+            size = ?, 
+            rooms = ?, 
+            bathrooms = ?, 
+            garages = ?, 
+            rent = ?, 
+            condo = ?, 
+            description = ?
+            WHERE code = ?;'''.format(table=self.table), values)
+
+    def __create_table(self):
+        self.cursor.execute(
             '''
-            create table if not exists {table}
+            CREATE TABLE IF NOT EXISTS {table}
             (name TEXT,
-            address TEXT,
+            street TEXT,
+            district TEXT,
+            city TEXT,
             size INT,
             rooms INT,
             bathrooms INT,
@@ -26,26 +59,11 @@ class ApartmentPipeline:
             description TEXT,
             code INT PRIMARY KEY)
             '''.format(table=self.table))
+        self.connection.commit()
+
+    def handle_error(self, e):
+        logger.error(e)
 
     def __del__(self):
-        if len(self.buff) > 0:
-            self.__insert()
-            self.con.commit()
-        self.cur.close()
-        self.con.close()
-
-    def process_item(self, item, spider):
-        self.buff.append((
-            item['name'], item['address'], item['size'], item.get('rooms', 0), item.get('bathrooms', 0),
-            item.get('garages', 0), item['rent'], item.get('condo', 0), item['description'], item['code']))
-        if len(self.buff) == self.buff_size:
-            self.__insert()
-            self.con.commit()
-            del self.buff[:]
-        return item
-
-    def __insert(self):
-        try:
-            self.cur.executemany("INSERT INTO {table} VALUES(?,?,?,?,?,?,?,?,?,?);".format(table=self.table), self.buff)
-        except sqlite3.IntegrityError:
-            logging.warning('Skipping item already on db')
+        self.cursor.close()
+        self.connection.close()

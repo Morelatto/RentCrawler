@@ -1,6 +1,6 @@
 import scrapy
 
-from vr_crawler.items import ApartmentLoader
+from vr_crawler.items import ApartmentLoader, AddressLoader
 
 
 class QuotesSpider(scrapy.Spider):
@@ -11,10 +11,10 @@ class QuotesSpider(scrapy.Spider):
         return [scrapy.Request(url=self.start_url, headers={'Referer': 'https://www.vivareal.com.br'})]
 
     def parse(self, response):
-        for res in response.css('.results-list article'):
-            loader = ApartmentLoader(selector=res)
+        for apartment in response.css('.results-list article'):
+            loader = ApartmentLoader(selector=apartment)
             loader.add_css('name', 'h2 a::text')
-            loader.add_css('address', 'h2 span::text')
+            loader.add_value('address', self.get_address(apartment))
 
             details_loader = loader.nested_css('ul.property-card__details')
             details_loader.add_css('size', 'li.property-card__detail-area span::text')
@@ -33,3 +33,11 @@ class QuotesSpider(scrapy.Spider):
         if next_page:
             next_page = '{url}?pagina={page}'.format(url=self.start_url, page=next_page)
             yield scrapy.Request(next_page, callback=self.parse)
+
+    @classmethod
+    def get_address(cls, response):
+        address_loader = AddressLoader(selector=response)
+        address_loader.add_css('street', 'h2 span::text')
+        address_loader.add_css('district', 'h2 span::text')
+        address_loader.add_css('city', 'h2 span::text')
+        return address_loader.load_item()
