@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+from scrapy.pipelines.images import ImagesPipeline
 
 import logging
+import scrapy
 import sqlite3
 
 logger = logging.getLogger(__name__)
@@ -41,3 +43,13 @@ class ApartmentPipeline:
     def __del__(self):
         self.cursor.close()
         self.connection.close()
+
+
+class ApartmentPicturesPipeline(ImagesPipeline):
+    def file_path(self, request, response=None, info=None):
+        return '{}/{}.jpg'.format(request.meta['code'], request.meta['index'])
+
+    def get_media_requests(self, item, info):
+        for i, img_url in enumerate(item['img_urls']):
+            meta = {'code': item['code'], 'index': i}
+            yield scrapy.Request(url=img_url, meta=meta)

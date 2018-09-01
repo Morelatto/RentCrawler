@@ -3,9 +3,14 @@ import scrapy
 from vr_crawler.items import ApartmentLoader, AddressLoader
 
 
-class QuotesSpider(scrapy.Spider):
-    name = 'vivareal'
-    start_url = 'https://www.vivareal.com.br/aluguel/sp/sao-paulo/apartamento_residencial/'
+class ApartmentsSpider(scrapy.Spider):
+    name = 'apartments'
+    start_url = 'https://www.vivareal.com.br/aluguel/sp/sao-paulo/aapartamento_residencial/'
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'vr_crawler.pipelines.ApartmentPipeline': 300
+        },
+    }
 
     def start_requests(self):
         return [scrapy.Request(url=self.start_url, headers={'Referer': 'https://www.vivareal.com.br'})]
