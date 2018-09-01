@@ -50,9 +50,11 @@ TELNETCONSOLE_ENABLED = False
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 # }
 
-ITEM_PIPELINES = {
-   'vr_crawler.pipelines.ApartmentPipeline': 300,
-}
+# Configure item pipelines
+# See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+# ITEM_PIPELINES = {
+#    'vr_crawler.pipelines.VrCrawlerPipeline': 300,
+# }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -75,5 +77,5 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-LOG_STDOUT = True
-LOG_FILE = 'spider_log.txt'
+# LOG_STDOUT = True
+# LOG_FILE = 'spider_log.txt'
