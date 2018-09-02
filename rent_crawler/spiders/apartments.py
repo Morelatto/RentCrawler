@@ -1,4 +1,4 @@
-from vr_crawler.items import ApartmentLoader, AddressLoader, PricesLoader, DetailsLoader
+from rent_crawler.items import ApartmentLoader, AddressLoader, PricesLoader, DetailsLoader
 
 import scrapy
 
@@ -9,8 +9,8 @@ DISTRICTS_TO_DOWNLOAD = ['Vila Mariana', 'Jardim Paulista', 'Pinheiros', 'Bela V
 MAX_PRICE = 1500
 
 
-class ApartmentsSpider(scrapy.Spider):
-    name = 'apartments'
+class VivaRealSpider(scrapy.Spider):
+    name = 'vivareal'
     start_urls = ['https://www.vivareal.com.br/aluguel/sp/sao-paulo/apartamento_residencial/']
     code_search_url = 'https://www.vivareal.com.br/busca-por-codigo/?id='
 

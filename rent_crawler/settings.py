@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-BOT_NAME = 'vr_crawler'
+BOT_NAME = 'rent_crawler'
 
-SPIDER_MODULES = ['vr_crawler.spiders']
-NEWSPIDER_MODULE = 'vr_crawler.spiders'
+SPIDER_MODULES = ['rent_crawler.spiders']
+NEWSPIDER_MODULE = 'rent_crawler.spiders'
 
 USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
 
@@ -33,13 +33,13 @@ DEFAULT_REQUEST_HEADERS = {
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 # SPIDER_MIDDLEWARES = {
-#    'vr_crawler.middlewares.VrCrawlerSpiderMiddleware': 543,
+#    'rent_crawler.middlewares.VrCrawlerSpiderMiddleware': 543,
 # }
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 # DOWNLOADER_MIDDLEWARES = {
-#    'vr_crawler.middlewares.VrCrawlerDownloaderMiddleware': 543,
+#    'rent_crawler.middlewares.VrCrawlerDownloaderMiddleware': 543,
 # }
 
 # Enable or disable extensions
@@ -49,8 +49,8 @@ DEFAULT_REQUEST_HEADERS = {
 # }
 
 ITEM_PIPELINES = {
-    'vr_crawler.pipelines.ApartmentPipeline': 300,
-    'vr_crawler.pipelines.ApartmentPicturesPipeline': 1
+    'rent_crawler.pipelines.ApartmentPipeline': 300,
+    'rent_crawler.pipelines.ApartmentPicturesPipeline': 1
 }
 
 IMAGES_STORE = 'pictures/'
