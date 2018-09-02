@@ -1,3 +1,3 @@
 from scrapy import cmdline
 
-cmdline.execute("scrapy crawl apartment_pictures".split())
+cmdline.execute("scrapy crawl apartments".split())

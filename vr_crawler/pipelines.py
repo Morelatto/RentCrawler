@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from scrapy.pipelines.images import ImagesPipeline
-from vr_crawler.spiders.apartment_pictures import IMAGES_FOLDER
 
 import logging
 import os
@@ -27,21 +26,25 @@ class ApartmentPipeline:
         return item
 
     def __upsert(self, item):
-        values = (item.get('name'), item.get('address').get('street'), item.get('address').get('district'),
-                  item.get('address').get('city'), item.get('size'), item.get('rooms'), item.get('bathrooms'),
-                  item.get('garages'), item.get('rent'), item.get('condo'), item.get('description'), item.get('code'))
+        item_address = item['address']
+        item_details = item['details']
+        item_prices = item['prices']
+        values = (item_address.get('street'), item_address.get('district'), item_address.get('city'),
+                  item_details.get('size'), item_details.get('rooms'), item_details.get('bathrooms'),
+                  item_details.get('garages'), item_prices.get('rent'), item_prices.get('condo'), item.get('iptu'),
+                  item.get('characteristics'), item.get('description'), item.get('code'))
         try:
-            self.cursor.execute("INSERT INTO {} VALUES(?,?,?,?,?,?,?,?,?,?,?,?);".format(self.table), values)
+            self.cursor.execute("INSERT INTO {} VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?);".format(self.table), values)
         except sqlite3.IntegrityError:
             logger.debug('Updating item already on db: ' + item.get('code'))
-            self.cursor.execute("UPDATE {} SET name = ?, street = ?, district = ?, city = ?, size = ?, rooms = ?, "
-                                "bathrooms = ?, garages = ?, rent = ?, condo = ?, description = ? WHERE code = ?;"
-                                .format(self.table), values)
+            self.cursor.execute("UPDATE {} SET street = ?, district = ?, city = ?, size = ?, rooms = ?, bathrooms = ?,"
+                                " garages = ?, rent = ?, condo = ?, iptu=?, characteristics=?, description = ? WHERE"
+                                " code = ?;".format(self.table), values)
 
     def __create_table(self):
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS {} (name TEXT, street TEXT, district TEXT, city TEXT, "
-                            "size INT, rooms INT, bathrooms INT, garages INT, rent INT, condo INT, description TEXT, "
-                            "code INT PRIMARY KEY)".format(self.table))
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS {} (street TEXT, district TEXT, city TEXT, size INT, rooms INT,"
+                            " bathrooms INT, garages INT, rent INT, condo INT, iptu INT, characteristics TEXT,"
+                            " description TEXT, code INT PRIMARY KEY)".format(self.table))
         self.connection.commit()
 
     def __del__(self):
@@ -54,21 +57,15 @@ class ApartmentPicturesPipeline(ImagesPipeline):
         return '{}/{}/{}.jpg'.format(request.meta['district'], request.meta['code'], request.meta['index'])
 
     def get_media_requests(self, item, info):
-        for i, img_url in enumerate(item['img_urls']):
-            meta = {'code': item['code'], 'index': i, 'district': item['address']['district']}
-            yield scrapy.Request(url=img_url, meta=meta)
-        self.create_info_file(item['address'], item['prices'], item['characteristics'], item['description'], item[
-            'code'])
+        if 'img_urls' in item:
+            for i, img_url in enumerate(item['img_urls']):
+                meta = {'code': item['code'], 'index': i, 'district': item['address']['district']}
+                yield scrapy.Request(url=img_url, meta=meta)
+            self.create_info_file(item)
 
     @staticmethod
-    def create_info_file(address, prices, characteristics, description, code):
-        path = '{}/{}/{}'.format(IMAGES_FOLDER, address['district'], code)
+    def create_info_file(item):
+        path = 'pictures/{}/{}'.format(item['address']['district'], item['code'])
         os.makedirs(path, exist_ok=True)
         with open('{}/{}.txt'.format(path, INFO_FILE_NAME), 'w+') as f:
-            f.write(str(address))
-            f.write('\n')
-            f.write(str(prices))
-            f.write('\n')
-            f.write(str(characteristics))
-            f.write('\n')
-            f.write(str(description))
+            f.write(str(item))

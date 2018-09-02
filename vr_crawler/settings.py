@@ -26,11 +26,9 @@ ROBOTSTXT_OBEY = False
 # Disable Telnet Console (enabled by default)
 TELNETCONSOLE_ENABLED = False
 
-# Override the default request headers:
-# DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-# }
+DEFAULT_REQUEST_HEADERS = {
+    'Referer': 'https://www.vivareal.com.br'
+}
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
@@ -50,11 +48,12 @@ TELNETCONSOLE_ENABLED = False
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 # }
 
-# Configure item pipelines
-# See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    'vr_crawler.pipelines.VrCrawlerPipeline': 300,
-# }
+ITEM_PIPELINES = {
+    'vr_crawler.pipelines.ApartmentPipeline': 300,
+    'vr_crawler.pipelines.ApartmentPicturesPipeline': 1
+}
+
+IMAGES_STORE = 'pictures/'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
