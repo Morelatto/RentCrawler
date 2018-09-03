@@ -6,23 +6,22 @@ import scrapy
 
 class ZapSpider(scrapy.Spider):
     name = 'zap'
-    start_urls = [
-        'https://www.zapimoveis.com.br/aluguel/apartamentos/sp+sao-paulo/#{"precomaximo":"2500","parametrosautosuggest":[{"Bairro":"","Zona":"","Cidade":"SAO PAULO","Agrupamento":"","Estado":"SP"}],"pagina":"1","paginaOrigem":"Home","formato":"Lista"}']
+    start_urls = ['https://www.zapimoveis.com.br/aluguel/apartamentos/sp+sao-paulo/']
 
     def parse(self, response):
         for apartment in response.xpath('..//div[@class="card-view"]/article'):
             loader = ApartmentLoader(selector=apartment)
             loader.add_value('address', self.get_address(apartment))
-            loader.add_value('characteristics', self.get_characteristics(apartment))
+            loader.add_value('details', self.get_details(apartment))
             loader.add_value('prices', self.get_prices(apartment))
             loader.add_css('description', '.endereco p::text')
             loader.add_css('code', '::attr(data-id)')
             yield loader.load_item()
 
-        # current_page, max_page = re.findall('\d+', response.css('#proximaPagina::attr(onclick)').extract_first())
-        # if current_page and int(current_page) < int(max_page):
-        #     next_page = '{url}#{{"pagina":"{page}"}}'.format(url=self.start_url, page=str(int(current_page) + 1))
-        #     yield scrapy.Request(next_page, callback=self.parse, dont_filter=True)
+        current_page, max_page = re.findall('\d+', response.css('#proximaPagina::attr(onclick)').extract_first())
+        if current_page and int(current_page) < int(max_page):
+            next_page = '{url}#{{"pagina":"{page}"}}'.format(url=self.start_urls[0], page=str(int(current_page) + 1))
+            # yield scrapy.Request(next_page, callback=self.parse)
 
     @classmethod
     def get_address(cls, response):
@@ -33,7 +32,7 @@ class ZapSpider(scrapy.Spider):
         return address_loader.load_item()
 
     @classmethod
-    def get_characteristics(cls, response):
+    def get_details(cls, response):
         details_loader = DetailsLoader(item=ZapDetails(), selector=response)
         details_loader.add_css('size', '.icone-area::text')
         details_loader.add_css('rooms', '.icone-quartos::text')

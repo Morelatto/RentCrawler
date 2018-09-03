@@ -50,10 +50,10 @@ class ZapDetails(Details):
 class Prices(Item):
     rent = Field()
     condo = Field()
+    iptu = Field()
 
 
 class ZapPrices(Prices):
-    iptu = Field()
     total = Field()
 
 
@@ -67,7 +67,6 @@ class Apartment(Item):
 
 
 class VivaRealApartment(Apartment):
-    iptu = Field()
     characteristics = Field()
 
 
@@ -81,14 +80,6 @@ class PricesLoader(ItemLoader):
     default_output_processor = parse_currency
 
 
-class ApartmentLoader(ItemLoader):
-    default_item_class = Apartment
-    default_output_processor = TakeFirst()
-
-    description_in = strip
-    img_urls_out = Identity()
-
-
 class VivaRealAddressLoader(ItemLoader):
     default_item_class = Address
     default_input_processor = strip
@@ -100,12 +91,20 @@ class VivaRealAddressLoader(ItemLoader):
 
 class ZapAddressLoader(ItemLoader):
     default_item_class = ZapAddress
+    default_input_processor = strip
     default_output_processor = TakeFirst()
+
+
+class ApartmentLoader(ItemLoader):
+    default_item_class = Apartment
+    default_output_processor = TakeFirst()
+
+    description_in = strip
+    img_urls_out = Identity()
 
 
 class VivaRealApartmentLoader(ApartmentLoader):
     default_item_class = VivaRealApartment
 
-    iptu_out = parse_currency
     characteristics_out = Join(', ')
     code_in = parse_code

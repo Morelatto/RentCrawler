@@ -2,14 +2,6 @@ from rent_crawler.items import PricesLoader, DetailsLoader, VivaRealApartmentLoa
 
 import scrapy
 
-DISTRICTS_TO_DOWNLOAD = ['Vila Mariana', 'Jardim Paulista', 'Pinheiros', 'Bela Vista', 'Consolação', 'Higienópolis',
-                         'Paraíso', 'Jardins', 'Aclimação', 'Cerqueira César', 'Jardim América', 'Jardim Europa',
-                         'Chácara Klabin', 'Jardim Paulistano', 'Praça da Árvore', 'Saúde', 'Vila Clementino',
-                         'Santa Cecília', 'Centro', 'Liberdade', 'Jabaquara', 'Vila Guarani', 'Planalto Paulista',
-                         'Sumaré', 'República', 'Barra Funda', 'Liberdade', 'Mirandópolis', 'São Judas']
-
-MAX_PRICE = 1500
-
 
 class VivaRealSpider(scrapy.Spider):
     name = 'vivareal'
@@ -26,22 +18,28 @@ class VivaRealSpider(scrapy.Spider):
             loader.add_css('code', 'a.js-card-title::attr(href)')
 
             item = loader.load_item()
-            if item['address']['district'] in DISTRICTS_TO_DOWNLOAD and item['prices']['rent'] < MAX_PRICE:
+            total = item['prices']['rent'] + item['prices'].get('condo', 0)
+            if item['address']['district'] in self.settings['DISTRICTS_TO_DOWNLOAD'] \
+                    and total < self.settings['MAX_PRICE']:
                 yield scrapy.Request(self.code_search_url + item['code'], callback=self.parse_apartment,
                                      meta={'item': item})
             else:
                 yield item
 
         next_page = response.css('a.js-change-page::attr(data-page)')[-1].extract()
-        if next_page:
+        if next_page and int(next_page) <= 10:
             next_page = '{url}?pagina={page}'.format(url=self.start_urls[0], page=next_page)
             yield scrapy.Request(next_page, callback=self.parse)
 
     def parse_apartment(self, response):
-        loader = VivaRealApartmentLoader(item=response.meta['item'], selector=response)
+        item = response.meta['item']
+        prices_loader = PricesLoader(item=item['prices'], selector=response)
+        prices_loader.add_css('iptu', '.js-detail-iptu-price::text')
+
+        loader = VivaRealApartmentLoader(item=item, selector=response)
         loader.add_xpath('img_urls', '//div[contains(@class, "H")]//img[contains(@class, "hK")]/@data-src')
         loader.add_css('characteristics', '.qn li::text')
-        loader.add_css('iptu', '.js-detail-iptu-price::text')
+        loader.add_value('prices', prices_loader.load_item())
         yield loader.load_item()
 
     @classmethod
