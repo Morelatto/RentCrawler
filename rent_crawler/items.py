@@ -32,13 +32,8 @@ class Address(Item):
     city = Field()
 
 
-class AddressLoader(ItemLoader):
-    default_item_class = Address
-    default_input_processor = strip
-
-    street_out = parse_street
-    district_out = parse_district
-    city_out = parse_city
+class ZapAddress(Address):
+    cep = Field()
 
 
 class Details(Item):
@@ -48,9 +43,8 @@ class Details(Item):
     garages = Field()
 
 
-class DetailsLoader(ItemLoader):
-    default_item_class = Details
-    default_output_processor = parse_number
+class ZapDetails(Details):
+    suite = Field(Details.fields['bathrooms'])
 
 
 class Prices(Item):
@@ -58,28 +52,60 @@ class Prices(Item):
     condo = Field()
 
 
-class PricesLoader(ItemLoader):
-    default_item_class = Prices
-    default_output_processor = parse_currency
+class ZapPrices(Prices):
+    iptu = Field()
+    total = Field()
 
 
 class Apartment(Item):
     address = Field(serializer=Address)
     details = Field(serializer=Details)
     prices = Field(serializer=Prices)
-    iptu = Field()
     description = Field()
-    characteristics = Field()
     code = Field()
     img_urls = Field()
+
+
+class VivaRealApartment(Apartment):
+    iptu = Field()
+    characteristics = Field()
+
+
+class DetailsLoader(ItemLoader):
+    default_item_class = Details
+    default_output_processor = parse_number
+
+
+class PricesLoader(ItemLoader):
+    default_item_class = Prices
+    default_output_processor = parse_currency
 
 
 class ApartmentLoader(ItemLoader):
     default_item_class = Apartment
     default_output_processor = TakeFirst()
 
-    iptu_out = parse_currency
     description_in = strip
+    img_urls_out = Identity()
+
+
+class VivaRealAddressLoader(ItemLoader):
+    default_item_class = Address
+    default_input_processor = strip
+
+    street_out = parse_street
+    district_out = parse_district
+    city_out = parse_city
+
+
+class ZapAddressLoader(ItemLoader):
+    default_item_class = ZapAddress
+    default_output_processor = TakeFirst()
+
+
+class VivaRealApartmentLoader(ApartmentLoader):
+    default_item_class = VivaRealApartment
+
+    iptu_out = parse_currency
     characteristics_out = Join(', ')
     code_in = parse_code
-    img_urls_out = Identity()

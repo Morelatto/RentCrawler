@@ -1,6 +1,8 @@
 select *
 from apartments;
 
+select distinct district from apartments where district not in ('Vila Mariana', 'Jardim Paulista', 'Pinheiros', 'Bela Vista', 'Consolação', 'Higienópolis', 'Paraíso', 'Jardins', 'Aclimação', 'Cerqueira César', 'Jardim América', 'Jardim Europa', 'Chácara Klabin') order by district;
+
 select count(*)
 from apartments;
 
@@ -12,8 +14,8 @@ from apartments
 group by district
 order by count(*) desc;
 
--- Vila Mariana, Jardim Paulista, Pinheiros, Bela Vista, Consolação, Higienópolis, Paraíso, Jardins, Aclimação, Cerqueira César, Jardim América, Jardim Europa, Chácara Klabin
--- Saúde, Vila Clementino, Santa Cecília, Centro, Liberdade, Jabaquara, Vila Guarani, Planalto Paulista, Sumaré, República
+-- Vila Mariana, Jardim Paulista, Pinheiros, Bela Vista, Consolação, Higienópolis, Paraíso, Jardins, Aclimação, Cerqueira César, Jardim América, Jardim Europa, Chácara Klabin, Jardim Paulistano, Praça da Árvore
+-- Saúde, Vila Clementino, Santa Cecília, Centro, Liberdade, Jabaquara, Vila Guarani, Planalto Paulista, Sumaré, República, Barra Funda, Liberdade, Mirandópolis, São Judas
 
 select *
 from (select street, district, size, rooms, bathrooms, garages, rent, condo, rent + condo as total, code
@@ -48,3 +50,4 @@ https://www.zapimoveis.com.br/oferta/aluguel+apartamento+1-quarto+bela-vista+cen
 https://www.zapimoveis.com.br/oferta/aluguel+apartamento+2-quartos+perdizes+zona-oeste+sao-paulo+sp+71m2/ID-19360293/?paginaoferta=4
 https://www.zapimoveis.com.br/superdestaque/aluguel+apartamento+1-quarto+santa-cecilia+centro+sao-paulo+sp+50m2/ID-19829270/
 */
+

@@ -1,11 +1,13 @@
-from rent_crawler.items import ApartmentLoader, AddressLoader, PricesLoader, DetailsLoader
+from rent_crawler.items import PricesLoader, DetailsLoader, VivaRealApartmentLoader, VivaRealAddressLoader
 
 import scrapy
 
 DISTRICTS_TO_DOWNLOAD = ['Vila Mariana', 'Jardim Paulista', 'Pinheiros', 'Bela Vista', 'Consolação', 'Higienópolis',
                          'Paraíso', 'Jardins', 'Aclimação', 'Cerqueira César', 'Jardim América', 'Jardim Europa',
-                         'Chácara Klabin', 'Saúde', 'Vila Clementino', 'Santa Cecília', 'Centro', 'Liberdade',
-                         'Jabaquara', 'Vila Guarani', 'Planalto Paulista', 'Sumaré', 'República']
+                         'Chácara Klabin', 'Jardim Paulistano', 'Praça da Árvore', 'Saúde', 'Vila Clementino',
+                         'Santa Cecília', 'Centro', 'Liberdade', 'Jabaquara', 'Vila Guarani', 'Planalto Paulista',
+                         'Sumaré', 'República', 'Barra Funda', 'Liberdade', 'Mirandópolis', 'São Judas']
+
 MAX_PRICE = 1500
 
 
@@ -16,7 +18,7 @@ class VivaRealSpider(scrapy.Spider):
 
     def parse(self, response):
         for apartment in response.css('.results-list article'):
-            loader = ApartmentLoader(selector=apartment)
+            loader = VivaRealApartmentLoader(selector=apartment)
             loader.add_value('address', self.get_address(apartment))
             loader.add_value('details', self.get_details(apartment))
             loader.add_value('prices', self.get_prices(apartment))
@@ -24,7 +26,7 @@ class VivaRealSpider(scrapy.Spider):
             loader.add_css('code', 'a.js-card-title::attr(href)')
 
             item = loader.load_item()
-            if item['address']['district'] in DISTRICTS_TO_DOWNLOAD and item['price']['rent'] < MAX_PRICE:
+            if item['address']['district'] in DISTRICTS_TO_DOWNLOAD and item['prices']['rent'] < MAX_PRICE:
                 yield scrapy.Request(self.code_search_url + item['code'], callback=self.parse_apartment,
                                      meta={'item': item})
             else:
@@ -36,7 +38,7 @@ class VivaRealSpider(scrapy.Spider):
             yield scrapy.Request(next_page, callback=self.parse)
 
     def parse_apartment(self, response):
-        loader = ApartmentLoader(item=response.meta['item'], selector=response)
+        loader = VivaRealApartmentLoader(item=response.meta['item'], selector=response)
         loader.add_xpath('img_urls', '//div[contains(@class, "H")]//img[contains(@class, "hK")]/@data-src')
         loader.add_css('characteristics', '.qn li::text')
         loader.add_css('iptu', '.js-detail-iptu-price::text')
@@ -44,7 +46,7 @@ class VivaRealSpider(scrapy.Spider):
 
     @classmethod
     def get_address(cls, response):
-        address_loader = AddressLoader(selector=response)
+        address_loader = VivaRealAddressLoader(selector=response)
         address_loader.add_css('street', 'h2 span::text')
         address_loader.add_css('district', 'h2 span::text')
         address_loader.add_css('city', 'h2 span::text')
