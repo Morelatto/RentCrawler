@@ -1,4 +1,4 @@
-from rent_crawler.items import PricesLoader, DetailsLoader, VivaRealApartmentLoader, VivaRealAddressLoader
+from rent_crawler.items import PricesLoader, VivaRealAddressLoader, VivaRealApartmentLoader, VivaRealDetailsLoader
 
 import scrapy
 
@@ -59,7 +59,7 @@ class VivaRealSpider(scrapy.Spider):
 
     @classmethod
     def get_details(cls, response):
-        details_loader = DetailsLoader(selector=response)
+        details_loader = VivaRealDetailsLoader(selector=response)
         details_loader.add_css('size', 'li.property-card__detail-area span::text')
         details_loader.add_css('rooms', 'li.js-property-detail-rooms span::text')
         details_loader.add_css('bathrooms', 'li.js-property-detail-bathroom span::text')

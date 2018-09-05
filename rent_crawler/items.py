@@ -24,16 +24,13 @@ parse_number = Compose(TakeFirst(), lambda string: re.findall('\d+|$', string)[0
 parse_currency = Compose(TakeFirst(), lambda price: price.split('R$ ')[-1].replace('.', ''), float)
 parse_code = MapCompose(lambda url: url.split('id-')[-1][:-1])
 strip = MapCompose(str.strip)
+join = Join(', ')
 
 
 class Address(Item):
     street = Field()
     district = Field()
     city = Field()
-
-
-class ZapAddress(Address):
-    cep = Field()
 
 
 class Details(Item):
@@ -53,10 +50,6 @@ class Prices(Item):
     iptu = Field()
 
 
-class ZapPrices(Prices):
-    total = Field()
-
-
 class Apartment(Item):
     address = Field(serializer=Address)
     details = Field(serializer=Details)
@@ -72,6 +65,10 @@ class VivaRealApartment(Apartment):
 
 class DetailsLoader(ItemLoader):
     default_item_class = Details
+    default_output_processor = TakeFirst()
+
+
+class VivaRealDetailsLoader(DetailsLoader):
     default_output_processor = parse_number
 
 
@@ -80,19 +77,20 @@ class PricesLoader(ItemLoader):
     default_output_processor = parse_currency
 
 
-class VivaRealAddressLoader(ItemLoader):
+class AddressLoader(ItemLoader):
     default_item_class = Address
     default_input_processor = strip
+    default_output_processor = TakeFirst()
 
+
+class VivaRealAddressLoader(AddressLoader):
     street_out = parse_street
     district_out = parse_district
     city_out = parse_city
 
 
-class ZapAddressLoader(ItemLoader):
-    default_item_class = ZapAddress
-    default_input_processor = strip
-    default_output_processor = TakeFirst()
+class ZapAddressLoader(AddressLoader):
+    street_out = join
 
 
 class ApartmentLoader(ItemLoader):
@@ -106,5 +104,5 @@ class ApartmentLoader(ItemLoader):
 class VivaRealApartmentLoader(ApartmentLoader):
     default_item_class = VivaRealApartment
 
-    characteristics_out = Join(', ')
+    characteristics_out = join
     code_in = parse_code
