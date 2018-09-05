@@ -54,6 +54,7 @@ class ZapSpider(scrapy.Spider):
             loader.add_value('prices', self.get_prices(apartment))
             loader.add_value('description', apartment['Observacao'])
             loader.add_value('code', apartment['ZapID'])
+            loader.add_value('source', 'Z')
             yield loader.load_item()
 
     @classmethod

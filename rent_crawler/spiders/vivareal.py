@@ -16,6 +16,7 @@ class VivaRealSpider(scrapy.Spider):
             loader.add_value('prices', self.get_prices(apartment))
             loader.add_css('description', 'div.js-property-description::text')
             loader.add_css('code', 'a.js-card-title::attr(href)')
+            loader.add_value('source', 'VR')
 
             item = loader.load_item()
             total = item['prices']['rent'] + item['prices'].get('condo', 0)

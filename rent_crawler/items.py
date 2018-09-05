@@ -57,6 +57,7 @@ class Apartment(Item):
     description = Field()
     code = Field()
     img_urls = Field()
+    source = Field()
 
 
 class VivaRealApartment(Apartment):
