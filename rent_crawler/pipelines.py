@@ -57,7 +57,7 @@ class ApartmentPicturesPipeline(ImagesPipeline):
         return '{}/{}/{}.jpg'.format(request.meta['district'], request.meta['code'], request.meta['index'])
 
     def get_media_requests(self, item, info):
-        if 'img_urls' in item:
+        if 'img_urls' in item and len(item['img_urls']) > 0:
             for i, img_url in enumerate(item['img_urls']):
                 meta = {'code': item['code'], 'index': i, 'district': item['address']['district']}
                 yield scrapy.Request(url=img_url, meta=meta)
