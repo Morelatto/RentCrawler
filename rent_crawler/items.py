@@ -58,6 +58,7 @@ class Apartment(Item):
     code = Field()
     img_urls = Field()
     source = Field()
+    updated = Field()
 
 
 class VivaRealApartment(Apartment):

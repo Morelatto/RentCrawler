@@ -40,7 +40,7 @@ class ZapSpider(scrapy.Spider):
 
     def parse(self, response):
         json_response = json.loads(response.body_as_unicode())
-        for page in range(1, int(json_response['Resultado']['QuantidadePaginas']))[:10]:
+        for page in range(1, int(json_response['Resultado']['QuantidadePaginas'])):
             post_data = self.format_form_data(page)
             yield scrapy.FormRequest(url=self.start_url, formdata=post_data, callback=self.parse_json_response,
                                      dont_filter=True)
@@ -57,6 +57,7 @@ class ZapSpider(scrapy.Spider):
             loader.add_value('img_urls', self.get_img_urls(apartment, loader.get_collected_values('address')[0],
                                                            loader.get_collected_values('prices')[0]))
             loader.add_value('source', 'Z')
+            loader.add_value('updated', apartment['DataAtualizacaoHumanizada'])
             yield loader.load_item()
 
     @classmethod

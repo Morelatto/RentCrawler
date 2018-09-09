@@ -28,14 +28,14 @@ class VivaRealSpider(scrapy.Spider):
                 yield item
 
         next_page = response.css('a.js-change-page::attr(data-page)')[-1].extract()
-        if next_page and int(next_page) <= 10:
+        if next_page:
             next_page = '{url}?pagina={page}'.format(url=self.start_urls[0], page=next_page)
             yield scrapy.Request(next_page, callback=self.parse)
 
     def parse_apartment(self, response):
         item = response.meta['item']
         prices_loader = PricesLoader(item=item['prices'], selector=response)
-        prices_loader.add_css('iptu', '.js-detail-iptu-price::text')
+        prices_loader.add_css('iptu', '.js-detail-iptu-price::text') # TODO debug null iptu
 
         loader = VivaRealApartmentLoader(item=item, selector=response)
         loader.add_xpath('img_urls', '//div[contains(@class, "H")]//img[contains(@class, "hK")]/@data-src')
