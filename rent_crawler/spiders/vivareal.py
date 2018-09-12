@@ -20,6 +20,7 @@ class VivaRealSpider(scrapy.Spider):
 
             item = loader.load_item()
             total = item['prices']['rent'] + item['prices'].get('condo', 0)
+            # TODO use js payload to parse images and other info without entering page
             if item['address']['district'] in self.settings['DISTRICTS_TO_DOWNLOAD'] \
                     and total < self.settings['MAX_PRICE']:
                 yield scrapy.Request(self.code_search_url + item['code'], callback=self.parse_apartment,

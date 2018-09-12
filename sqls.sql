@@ -21,11 +21,25 @@ order by count(*) desc;
 -- Saúde, Vila Clementino, Santa Cecília, Centro, Liberdade, Jabaquara, Vila Guarani, Planalto Paulista, Sumaré, República, Barra Funda, Liberdade, Mirandópolis, São Judas
 
 select *
-from (select street, district, size, rooms, bathrooms, garages, rent, condo, iptu, rent + condo as total, code, updated, characteristics
+from (select street, district, size, rooms, bathrooms, garages, rent, condo, iptu, rent + condo + iptu as total, code, updated, characteristics
       from apartments
       where district in
-            ('Vila Mariana', 'Jardim Paulista', 'Pinheiros', 'Bela Vista', 'Consolação', 'Higienópolis', 'Paraíso', 'Jardins', 'Aclimação', 'Cerqueira César', 'Jardim América', 'Jardim Europa', 'Chácara Klabin'))
-where total < 2500
+            ('Jardim Paulistano',
+            'Pinheiros',
+            'Jardim Europa',
+            'Jardins',
+            'Jardim América',
+            'Cerqueira César',
+            'Jardim Paulista',
+            'Bela Vista',
+            'Consolação',
+            'Paraíso',
+            'Vila Mariana',
+            'Chácara Klabin',
+            'Higienópolis',
+            'Aclimação')
+            )
+where total < 2500 and district = 'Pinheiros'
 order by size desc, total; -- last one: 38
 
 select code

@@ -51,18 +51,14 @@ class Prices(Item):
 
 
 class Apartment(Item):
+    code = Field()
     address = Field(serializer=Address)
     details = Field(serializer=Details)
     prices = Field(serializer=Prices)
     description = Field()
-    code = Field()
+    characteristics = Field()
     img_urls = Field()
     source = Field()
-    updated = Field()
-
-
-class VivaRealApartment(Apartment):
-    characteristics = Field()
 
 
 class DetailsLoader(ItemLoader):
@@ -100,11 +96,9 @@ class ApartmentLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
     description_in = strip
+    characteristics_out = join
     img_urls_out = Identity()
 
 
 class VivaRealApartmentLoader(ApartmentLoader):
-    default_item_class = VivaRealApartment
-
-    characteristics_out = join
     code_in = parse_code

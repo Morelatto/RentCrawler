@@ -23,7 +23,7 @@ class ZapSpider(scrapy.Spider):
                         '"pagina":"{page}",'
                         '"ordem":"Relevancia",'
                         '"paginaOrigem":"ResultadoBusca",'
-                        '"semente":"1515178556",'
+                        '"semente":"108848774",'
                         '"formato":"Lista"}}',
         'formato': 'Lista'
     }
@@ -49,15 +49,14 @@ class ZapSpider(scrapy.Spider):
         json_response = json.loads(response.body_as_unicode())
         for apartment in json_response['Resultado']['Resultado']:
             loader = ApartmentLoader()
+            loader.add_value('code', apartment['ZapID'])
             loader.add_value('address', self.get_address(apartment))
             loader.add_value('details', self.get_details(apartment))
             loader.add_value('prices', self.get_prices(apartment))
             loader.add_value('description', apartment['Observacao'])
-            loader.add_value('code', apartment['ZapID'])
-            loader.add_value('img_urls', self.get_img_urls(apartment, loader.get_collected_values('address')[0],
-                                                           loader.get_collected_values('prices')[0]))
+            loader.add_value('characteristics', apartment['Caracteristicas'])
+            loader.add_value('img_urls', [picture['UrlImagemTamanhoG'] for picture in apartment['Fotos']])
             loader.add_value('source', 'Z')
-            loader.add_value('updated', apartment['DataAtualizacaoHumanizada'])
             yield loader.load_item()
 
     @classmethod
@@ -85,10 +84,3 @@ class ZapSpider(scrapy.Spider):
         prices_loader.add_value('condo', json_apartment['PrecoCondominio'])
         prices_loader.add_value('iptu', json_apartment['ValorIPTU'])
         return prices_loader.load_item()
-
-    def get_img_urls(self, json_apartment, address, prices):
-        total = prices.get('rent', 0) + prices.get('condo', 0) + prices.get('iptu', 0)
-        if address['district'] in self.settings['DISTRICTS_TO_DOWNLOAD'] and total < self.settings['MAX_PRICE']:
-            for picture in json_apartment['Fotos']:
-                yield picture['UrlImagemTamanhoG']
-        return []

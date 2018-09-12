@@ -39,11 +39,3 @@ IMAGES_STORE = 'pictures/'
 
 # LOG_STDOUT = True
 # LOG_FILE = 'spider_log.txt'
-
-DISTRICTS_TO_DOWNLOAD = ['Vila Mariana', 'Jardim Paulista', 'Pinheiros', 'Bela Vista', 'Consolação', 'Higienópolis',
-                         'Paraíso', 'Jardins', 'Aclimação', 'Cerqueira César', 'Jardim América', 'Jardim Europa',
-                         'Chácara Klabin', 'Jardim Paulistano', 'Praça da Árvore', 'Saúde', 'Vila Clementino',
-                         'Santa Cecília', 'Centro', 'Jabaquara', 'Vila Guarani', 'Planalto Paulista', 'Sumaré',
-                         'República', 'Barra Funda', 'Liberdade', 'Mirandópolis', 'São Judas']
-
-MAX_PRICE = 2000
