@@ -1,4 +1,4 @@
-from rent_crawler.items import ApartmentLoader, DetailsLoader, PricesLoader, ZapAddressLoader, ZapDetails
+from rent_crawler.items import ApartmentLoader, DetailsLoader, PricesLoader, AddressLoader
 
 import json
 import scrapy
@@ -61,7 +61,7 @@ class ZapSpider(scrapy.Spider):
 
     @classmethod
     def get_address(cls, json_apartment):
-        address_loader = ZapAddressLoader()
+        address_loader = AddressLoader()
         address_loader.add_value('street', json_apartment['Endereco'])
         address_loader.add_value('street', json_apartment['Numero'])
         address_loader.add_value('district', json_apartment['BairroOficial'])
@@ -70,7 +70,7 @@ class ZapSpider(scrapy.Spider):
 
     @classmethod
     def get_details(cls, json_apartment):
-        details_loader = DetailsLoader(item=ZapDetails())
+        details_loader = DetailsLoader()
         details_loader.add_value('size', json_apartment['Area'])
         details_loader.add_value('rooms', json_apartment['QuantidadeQuartos'])
         details_loader.add_value('suite', json_apartment['QuantidadeSuites'])

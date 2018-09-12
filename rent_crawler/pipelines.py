@@ -34,22 +34,23 @@ class ApartmentPipeline:
         item_details = item['details']
         item_prices = item['prices']
         values = (item_address.get('street'), item_address.get('district'), item_address.get('city'),
-                  item_details.get('size'), item_details.get('rooms'), item_details.get('bathrooms'),
-                  item_details.get('garages'), item_prices.get('rent'), item_prices.get('condo'),
-                  item_prices.get('iptu'), item.get('characteristics'), item.get('description'), item.get('source'),
-                  item.get('code'))
+                  item_details.get('size'), item_details.get('rooms'), item_details.get('suite'),
+                  item_details.get('bathrooms'), item_details.get('garages'), item_prices.get('rent'),
+                  item_prices.get('condo'), item_prices.get('iptu'), item.get('characteristics'),
+                  item.get('description'), item.get('source'), item.get('code'))
         try:
-            self.cursor.execute("INSERT INTO {} VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?);".format(self.table), values)
+            self.cursor.execute("INSERT INTO {} VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);".format(self.table), values)
         except sqlite3.IntegrityError:
             logger.debug('Updating item already on db: ' + item.get('code'))
-            self.cursor.execute("UPDATE {} SET street = ?, district = ?, city = ?, size = ?, rooms = ?, bathrooms = ?, "
-                                "garages = ?, rent = ?, condo = ?, iptu=?, characteristics=?, description = ?, "
-                                "source = ? WHERE code = ?;".format(self.table), values)
+            self.cursor.execute("UPDATE {} SET street = ?, district = ?, city = ?, size = ?, rooms = ?, suite = ?,"
+                                " bathrooms = ?, garages = ?, rent = ?, condo = ?, iptu=?, characteristics=?, "
+                                "description = ?, source = ? WHERE code = ?;".format(self.table), values)
 
     def __create_table(self):
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS {} (street TEXT, district TEXT, city TEXT, size INT, rooms INT,"
-                            " bathrooms INT, garages INT, rent INT, condo INT, iptu INT, characteristics TEXT,"
-                            " description TEXT, source TEXT, code INT PRIMARY KEY)".format(self.table))
+        self.cursor.execute(
+            "CREATE TABLE IF NOT EXISTS {} (street TEXT, district TEXT, city TEXT, size INT, rooms INT, suite INT, "
+            "bathrooms INT, garages INT, rent INT, condo INT, iptu INT, characteristics TEXT, description TEXT, "
+            "source TEXT, code INT PRIMARY KEY)".format(self.table))
         self.connection.commit()
 
     def __del__(self):
