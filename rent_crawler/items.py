@@ -5,7 +5,7 @@ from scrapy.loader.processors import MapCompose, TakeFirst, Compose, Identity, J
 
 import re
 
-parse_number = Compose(TakeFirst(), lambda string: re.findall('\d+|$', string)[0])
+parse_number = Compose(TakeFirst(), lambda string: re.findall('\d+|$', str(string))[0])
 parse_currency = Compose(TakeFirst(), lambda price: price.split('R$ ')[-1].replace('.', ''), float)
 strip = MapCompose(str.strip)
 join = Join(', ')

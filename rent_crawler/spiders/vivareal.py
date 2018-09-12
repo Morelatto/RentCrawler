@@ -4,7 +4,8 @@ import json
 import scrapy
 
 # TODO auto detect
-TOTAL_PAGES = 277
+TOTAL_PAGES = 10
+SIZE = 36
 
 
 class VivaRealSpider(scrapy.Spider):
@@ -26,7 +27,7 @@ class VivaRealSpider(scrapy.Spider):
                   'filterUnitType=APARTMENT&' \
                   'filterListingType=USED&' \
                   'includeFields=addresses%2ClistingsLocation%2Cseo%2Csearch%2Curl%2Cexpansion%2Cnearby&' \
-                  'size=36&' \
+                  'size={size}&' \
                   'from={from_}&' \
                   'filterPropertyType=UNIT&' \
                   'q=&' \
@@ -35,7 +36,7 @@ class VivaRealSpider(scrapy.Spider):
 
     def start_requests(self):
         for i in range(TOTAL_PAGES):
-            yield scrapy.Request(url=self.listing_url.format(from_=36 * i))
+            yield scrapy.Request(url=self.listing_url.format(size=SIZE, from_=SIZE * i))
 
     def parse(self, response):
         json_response = json.loads(response.body_as_unicode())
@@ -48,7 +49,8 @@ class VivaRealSpider(scrapy.Spider):
             loader.add_value('prices', self.get_prices(json_apartment['pricingInfos'][0]))
             loader.add_value('description', json_apartment['description'])
             loader.add_value('characteristics', json_apartment['amenities'])
-            loader.add_value('img_urls', [image.format(width=600, height=900) for image in json_apartment['images']])
+            loader.add_value('img_urls', [image.format(width=600, height=900, action='action')
+                                          for image in json_apartment['images']])
             loader.add_value('source', 'VR')
 
             yield loader.load_item()
@@ -56,8 +58,8 @@ class VivaRealSpider(scrapy.Spider):
     @classmethod
     def get_address(cls, json_address):
         address_loader = AddressLoader()
-        address_loader.add_value('street', json_address['street'])
-        address_loader.add_value('street', json_address['streetNumber'])
+        address_loader.add_value('street', json_address.get('street'))
+        address_loader.add_value('street', json_address.get('streetNumber'))
         address_loader.add_value('district', json_address['neighborhood'])
         address_loader.add_value('city', json_address['city'])
         return address_loader.load_item()
@@ -75,7 +77,7 @@ class VivaRealSpider(scrapy.Spider):
     @classmethod
     def get_prices(cls, json_prices):
         prices_loader = PricesLoader()
-        prices_loader.add_value('rent', json_prices['price'])
-        prices_loader.add_value('condo', json_prices['monthlyCondoFee'])
-        prices_loader.add_value('iptu', json_prices['yearlyIptu'])
+        prices_loader.add_value('rent', json_prices.get('price'))
+        prices_loader.add_value('condo', json_prices.get('monthlyCondoFee'))
+        prices_loader.add_value('iptu', json_prices.get('yearlyIptu'))
         return prices_loader.load_item()
