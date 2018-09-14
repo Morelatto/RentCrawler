@@ -12,7 +12,7 @@ join = Join(', ')
 
 
 class Address(Item):
-    street = Field()
+    street = Field(output_processor=join)
     district = Field()
     city = Field()
 
@@ -21,8 +21,6 @@ class AddressLoader(ItemLoader):
     default_item_class = Address
     default_input_processor = strip
     default_output_processor = TakeFirst()
-
-    street_out = join
 
 
 class Details(Item):
@@ -36,6 +34,11 @@ class Details(Item):
 class DetailsLoader(ItemLoader):
     default_item_class = Details
     default_output_processor = parse_number
+
+
+class TextDetails(Item):
+    description = Field(input_processor=strip, output_processor=TakeFirst())
+    characteristics = Field(output_processor=join)
 
 
 class Prices(Item):
@@ -52,18 +55,13 @@ class PricesLoader(ItemLoader):
 class Apartment(Item):
     code = Field()
     address = Field(serializer=Address)
-    details = Field(serializer=Details)
     prices = Field(serializer=Prices)
-    description = Field()
-    characteristics = Field()
-    img_urls = Field()
+    details = Field(serializer=Details)
+    text_details = Field(serializer=TextDetails)
+    img_urls = Field(output_processor=Identity())
     source = Field()
 
 
 class ApartmentLoader(ItemLoader):
     default_item_class = Apartment
     default_output_processor = TakeFirst()
-
-    description_in = strip
-    characteristics_out = join
-    img_urls_out = Identity()

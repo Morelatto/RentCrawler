@@ -1,7 +1,10 @@
-from rent_crawler.items import ApartmentLoader, DetailsLoader, PricesLoader, AddressLoader
+from scrapy.loader import ItemLoader
+from rent_crawler.items import ApartmentLoader, DetailsLoader, PricesLoader, AddressLoader, TextDetails
 
 import json
 import scrapy
+
+ZAP_SOURCE = 'Z'
 
 
 class ZapSpider(scrapy.Spider):
@@ -14,36 +17,35 @@ class ZapSpider(scrapy.Spider):
         },
     }
 
-    form_data = {
-        'tipoOferta': '1',
-        'ordenacaoSelecionada': '',
-        'pathName': '/aluguel/apartamentos/sp+sao-paulo/',
-        'hashFragment': '{{"precomaximo":"2147483647",'
-                        '"parametrosautosuggest":[{{"Bairro":"","Zona":"","Cidade":"SAO+PAULO","Agrupamento":"","Estado":"SP"}}],'
-                        '"pagina":"{page}",'
-                        '"ordem":"Relevancia",'
-                        '"paginaOrigem":"ResultadoBusca",'
-                        '"semente":"108848774",'
-                        '"formato":"Lista"}}',
-        'formato': 'Lista'
-    }
-
-    def format_form_data(self, page):
-        post_data = self.form_data.copy()
-        post_data['paginaAtual'] = str(page)
-        post_data['hashFragment'] = post_data['hashFragment'].format(page=page)
-        return post_data
+    @staticmethod
+    def format_form_data(page):
+        page = str(page)
+        form_data = {
+            'tipoOferta': '1',
+            'ordenacaoSelecionada': '',
+            'pathName': '/aluguel/apartamentos/sp+sao-paulo/',
+            'hashFragment':
+                '{{"precomaximo":"2147483647",'
+                '"parametrosautosuggest":[{{"Bairro":"","Zona":"","Cidade":"SAO+PAULO","Agrupamento":"","Estado":"SP"}}],'
+                '"pagina":"{}",'
+                '"ordem":"Relevancia",'
+                '"paginaOrigem":"ResultadoBusca",'
+                '"semente":"108848774",'
+                '"formato":"Lista"}}'.format(page),
+            'formato': 'Lista',
+            'paginaAtual': page
+        }
+        return form_data
 
     def start_requests(self):
         post_data = self.format_form_data(1)
-        yield scrapy.FormRequest(url=self.start_url, formdata=post_data)
+        yield scrapy.FormRequest(url=self.start_url, formdata=post_data, dont_filter=True)
 
     def parse(self, response):
         json_response = json.loads(response.body_as_unicode())
         for page in range(1, int(json_response['Resultado']['QuantidadePaginas'])):
             post_data = self.format_form_data(page)
-            yield scrapy.FormRequest(url=self.start_url, formdata=post_data, callback=self.parse_json_response,
-                                     dont_filter=True)
+            yield scrapy.FormRequest(url=self.start_url, formdata=post_data, callback=self.parse_json_response)
 
     def parse_json_response(self, response):
         json_response = json.loads(response.body_as_unicode())
@@ -51,12 +53,11 @@ class ZapSpider(scrapy.Spider):
             loader = ApartmentLoader()
             loader.add_value('code', apartment['ZapID'])
             loader.add_value('address', self.get_address(apartment))
-            loader.add_value('details', self.get_details(apartment))
             loader.add_value('prices', self.get_prices(apartment))
-            loader.add_value('description', apartment['Observacao'])
-            loader.add_value('characteristics', apartment['Caracteristicas'])
-            loader.add_value('img_urls', [picture['UrlImagemTamanhoG'] for picture in apartment['Fotos']])
-            loader.add_value('source', 'Z')
+            loader.add_value('details', self.get_details(apartment))
+            loader.add_value('text_details', self.get_text_details(apartment))
+            loader.add_value('img_urls', self.get_img_urls(apartment))
+            loader.add_value('source', ZAP_SOURCE)
             yield loader.load_item()
 
     @classmethod
@@ -69,6 +70,14 @@ class ZapSpider(scrapy.Spider):
         return address_loader.load_item()
 
     @classmethod
+    def get_prices(cls, json_apartment):
+        prices_loader = PricesLoader()
+        prices_loader.add_value('rent', json_apartment['Valor'])
+        prices_loader.add_value('condo', json_apartment['PrecoCondominio'])
+        prices_loader.add_value('iptu', json_apartment['ValorIPTU'])
+        return prices_loader.load_item()
+
+    @classmethod
     def get_details(cls, json_apartment):
         details_loader = DetailsLoader()
         details_loader.add_value('size', json_apartment['Area'])
@@ -78,9 +87,12 @@ class ZapSpider(scrapy.Spider):
         return details_loader.load_item()
 
     @classmethod
-    def get_prices(cls, json_apartment):
-        prices_loader = PricesLoader()
-        prices_loader.add_value('rent', json_apartment['Valor'])
-        prices_loader.add_value('condo', json_apartment['PrecoCondominio'])
-        prices_loader.add_value('iptu', json_apartment['ValorIPTU'])
-        return prices_loader.load_item()
+    def get_text_details(cls, json_apartment):
+        text_details_loader = ItemLoader(item=TextDetails())
+        text_details_loader.add_value('description', json_apartment['Observacao'])
+        text_details_loader.add_value('characteristics', json_apartment['Caracteristicas'])
+        return text_details_loader.load_item()
+
+    @classmethod
+    def get_img_urls(cls, json_apartment):
+        return [picture['UrlImagemTamanhoG'] for picture in json_apartment['Fotos']]

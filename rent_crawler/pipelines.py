@@ -31,13 +31,14 @@ class ApartmentPipeline:
 
     def __upsert(self, item):
         item_address = item['address']
-        item_details = item['details']
         item_prices = item['prices']
+        item_details = item['details']
+        item_text_details = item['text_details']
         values = (item_address.get('street'), item_address.get('district'), item_address.get('city'),
                   item_details.get('size'), item_details.get('rooms'), item_details.get('suite'),
                   item_details.get('bathrooms'), item_details.get('garages'), item_prices.get('rent'),
-                  item_prices.get('condo'), item_prices.get('iptu'), item.get('characteristics'),
-                  item.get('description'), item.get('source'), item.get('code'))
+                  item_prices.get('condo'), item_prices.get('iptu'), item_text_details.get('characteristics'),
+                  item_text_details.get('description'), item.get('source'), item.get('code'))
         try:
             self.cursor.execute("INSERT INTO {} VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);".format(self.table), values)
         except sqlite3.IntegrityError:
