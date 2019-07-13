@@ -1,36 +1,36 @@
+import json
+import math
+
+import scrapy
 from scrapy.loader import ItemLoader
+
 from rent_crawler.items import ApartmentLoader, AddressLoader, PricesLoader, DetailsLoader, TextDetails
 
-import json
-import scrapy
-
-TOTAL_PAGES = 277  # TODO auto detect
-SIZE = 36
+PAGE_SIZE = 36
 VR_SOURCE = 'VR'
 
 
 class VivaRealSpider(scrapy.Spider):
+    MAX_PAGE = None
+
     name = 'vivareal'
-    start_url = 'https://glue-api.vivareal.com/v1/listings?' \
-                  'addressCity=São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo&' \
-                  'addressCountry=BR,BR,BR,BR,BR,BR,BR,BR,BR,BR,BR,BR,BR,BR&' \
-                  'addressGeolocationLat=-23.563003,-23.571203,-23.576831,-23.569324,-23.570877,-23.573414,-23.573414,-23.562831,-23.552568,0,-23.587056,-23.591681,-23.545751,-23.571487&' \
-                  'addressGeolocationLon=-46.686434,-46.68418,-46.680364,-46.656545,-46.670355,-46.672948,-46.672948,-46.646259,-46.655659,0,-46.635743,-46.62589,-46.659942,-46.630971&' \
-                  'addressLocationId=BR>Sao Paulo>NULL>Sao Paulo>Zona Oeste>Pinheiros,BR>Sao Paulo>NULL>Sao Paulo>Zona Oeste>Jardim Paulistano,BR>Sao Paulo>NULL>Sao Paulo>Zona Oeste>Jardim Europa,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Jardins,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Jardim America,BR>Sao Paulo>NULL>Sao Paulo>Centro>Cerqueira Cesar,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Jardim Paulista,BR>Sao Paulo>NULL>Sao Paulo>Centro>Bela Vista,BR>Sao Paulo>NULL>Sao Paulo>Centro>Consolacao,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Paraiso,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Vila Mariana,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Chacara Klabin,BR>Sao Paulo>NULL>Sao Paulo>Centro>Higienopolis,BR>Sao Paulo>NULL>Sao Paulo>Centro>Aclimacao&' \
-                  'addressNeighborhood=Pinheiros,Jardim Paulistano,Jardim Europa,Jardins,Jardim América,Cerqueira César,Jardim Paulista,Bela Vista,Consolação,Paraíso,Vila Mariana,Chácara Klabin,Higienópolis,Aclimação&' \
-                  'addressState=São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo,São Paulo&' \
-                  'addressStreet=,,,,,,,,,,,,,&' \
-                  'addressZone=Zona Oeste,Zona Oeste,Zona Oeste,Zona Sul,Zona Sul,Centro,Zona Sul,Centro,Centro,Zona Sul,Zona Sul,Zona Sul,Centro,Centro&' \
-                  'addresses=BR>Sao Paulo>NULL>Sao Paulo>Zona Oeste>Pinheiros,BR>Sao Paulo>NULL>Sao Paulo>Zona Oeste>Jardim Paulistano,BR>Sao Paulo>NULL>Sao Paulo>Zona Oeste>Jardim Europa,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Jardins,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Jardim America,BR>Sao Paulo>NULL>Sao Paulo>Centro>Cerqueira Cesar,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Jardim Paulista,BR>Sao Paulo>NULL>Sao Paulo>Centro>Bela Vista,BR>Sao Paulo>NULL>Sao Paulo>Centro>Consolacao,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Paraiso,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Vila Mariana,BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Chacara Klabin,BR>Sao Paulo>NULL>Sao Paulo>Centro>Higienopolis,BR>Sao Paulo>NULL>Sao Paulo>Centro>Aclimacao' \
-                  'filterPricingInfoBusinessType=RENTAL&facets=amenities&filter=(address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Zona Oeste>Pinheiros" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Zona Oeste>Jardim Paulistano" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Zona Oeste>Jardim Europa" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Jardins" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Jardim America" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Centro>Cerqueira Cesar" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Jardim Paulista" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Centro>Bela Vista" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Centro>Consolacao" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Paraiso" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Vila Mariana" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Zona Sul>Chacara Klabin" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Centro>Higienopolis" OR address.locationId:"BR>Sao Paulo>NULL>Sao Paulo>Centro>Aclimacao") AND pricingInfos.businessType:"RENTAL" AND unitTypes IN ["APARTMENT"] AND propertyType:"UNIT" AND listingType:"USED"&' \
-                  'filterUnitType=APARTMENT&filterListingType=USED&' \
-                  'includeFields=addresses,listingsLocation,seo,search,url,expansion,nearby,facets&' \
-                  'size={size}&from={from_}&' \
-                  'filterPropertyType=UNIT&q=&developmentsSize=5&__vt='
+    start_url = 'https://glue-api.vivareal.com/v1/listings?filter={filter}&size={size}&from={from_}'
+
+    def __init__(self, location_id, **kwargs):
+        super().__init__(**kwargs)
+        self.filter = '(address.locationId:"{}") ' \
+                      'AND pricingInfos.businessType:"RENTAL" ' \
+                      'AND unitTypes IN ["APARTMENT"] ' \
+                      'AND propertyType:"UNIT" ' \
+                      'AND listingType:"USED"'.format(location_id)
 
     def start_requests(self):
-        for i in range(TOTAL_PAGES):
-            yield scrapy.Request(url=self.start_url.format(size=SIZE, from_=SIZE * i))
+        page = 0
+        while True:
+            yield scrapy.Request(self.start_url.format(filter=self.filter, size=PAGE_SIZE, from_=PAGE_SIZE * page))
+            page += 1
+            if self.MAX_PAGE and page > self.MAX_PAGE:
+                break
 
     def parse(self, response):
         json_response = json.loads(response.body_as_unicode())
@@ -45,6 +45,9 @@ class VivaRealSpider(scrapy.Spider):
             loader.add_value('img_urls', self.get_img_urls(json_apartment['images']))
             loader.add_value('source', VR_SOURCE)
             yield loader.load_item()
+
+        if not self.MAX_PAGE:
+            self.MAX_PAGE = math.ceil(json_response['search']['totalCount'] / PAGE_SIZE)
 
     @classmethod
     def get_address(cls, json_address):
