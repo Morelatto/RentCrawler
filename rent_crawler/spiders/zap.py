@@ -8,6 +8,8 @@ ZAP_SOURCE = 'Z'
 
 
 class ZapSpider(scrapy.Spider):
+    MAX_PAGE = None
+
     name = 'zap'
     start_url = 'https://www.zapimoveis.com.br/Busca/RetornarBuscaAssincrona/'
 
@@ -38,16 +40,14 @@ class ZapSpider(scrapy.Spider):
         return form_data
 
     def start_requests(self):
-        post_data = self.format_form_data(1)
-        yield scrapy.FormRequest(url=self.start_url, formdata=post_data, dont_filter=True)
+        page = 1
+        while True:
+            yield scrapy.FormRequest(url=self.start_url, formdata=self.format_form_data(page), dont_filter=True)
+            page += 1
+            if self.MAX_PAGE and page > self.MAX_PAGE:
+                break
 
     def parse(self, response):
-        json_response = json.loads(response.body_as_unicode())
-        for page in range(1, int(json_response['Resultado']['QuantidadePaginas'])):
-            post_data = self.format_form_data(page)
-            yield scrapy.FormRequest(url=self.start_url, formdata=post_data, callback=self.parse_json_response)
-
-    def parse_json_response(self, response):
         json_response = json.loads(response.body_as_unicode())
         for apartment in json_response['Resultado']['Resultado']:
             loader = ApartmentLoader()
@@ -59,6 +59,9 @@ class ZapSpider(scrapy.Spider):
             loader.add_value('img_urls', self.get_img_urls(apartment))
             loader.add_value('source', ZAP_SOURCE)
             yield loader.load_item()
+
+        if not self.MAX_PAGE:
+            self.MAX_PAGE = int(json_response['Resultado']['QuantidadePaginas'])
 
     @classmethod
     def get_address(cls, json_apartment):
