@@ -44,6 +44,8 @@ class VivaRealSpider(scrapy.Spider):
             loader.add_value('text_details', self.get_text_details(json_apartment))
             loader.add_value('img_urls', self.get_img_urls(json_apartment['images']))
             loader.add_value('source', VR_SOURCE)
+            loader.add_value('created_at', json_apartment.get('createdAt'))
+            loader.add_value('updated_at', json_apartment.get('updatedAt'))
             yield loader.load_item()
 
         if not self.MAX_PAGE:
