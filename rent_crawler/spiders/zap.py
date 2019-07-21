@@ -19,21 +19,26 @@ class ZapSpider(scrapy.Spider):
         },
     }
 
-    @staticmethod
-    def format_form_data(page):
+    def __init__(self, seed, friendly_url: str, parameters, **kwargs):
+        super().__init__(**kwargs)
+        self.seed = seed
+        self.url_path = friendly_url.split('https://www.zapimoveis.com.br')[1].rsplit('/', 1)[0]
+        self.parameters = parameters
+
+    def format_form_data(self, page):
         page = str(page)
         form_data = {
             'tipoOferta': '1',
             'ordenacaoSelecionada': '',
-            'pathName': '/aluguel/apartamentos/sp+sao-paulo/',
+            'pathName': self.url_path,
             'hashFragment':
                 '{{"precomaximo":"2147483647",'
-                '"parametrosautosuggest":[{{"Bairro":"","Zona":"","Cidade":"SAO+PAULO","Agrupamento":"","Estado":"SP"}}],'
+                '"parametrosautosuggest":{},'
                 '"pagina":"{}",'
                 '"ordem":"Relevancia",'
                 '"paginaOrigem":"ResultadoBusca",'
-                '"semente":"108848774",'
-                '"formato":"Lista"}}'.format(page),
+                '"semente":"{}",'
+                '"formato":"Lista"}}'.format(self.parameters, page, self.seed),
             'formato': 'Lista',
             'paginaAtual': page
         }

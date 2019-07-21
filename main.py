@@ -57,24 +57,31 @@ def get_zap_crawl_params(query):
             crits = results[0]['Criterios']
             zap_r = requests.post(zap_friendly_url, data=get_friendly_search_params(crits), headers=zap_headers)
             if zap_r.status_code == 200:
-                friendly_url = zap_r.content
+                friendly_url = zap_r.text
                 zap_r = requests.get(friendly_url, headers=headers)
                 if zap_r.status_code == 200:
                     seed_re = r'<input type="hidden" id="semente" data-value="(\d+)" />'
                     seed = re.findall(seed_re, zap_r.text)
-                    return {'seed': seed, 'friendly_url': friendly_url, 'parameters':}
+                    if seed:
+                        return {'seed': seed[0], 'friendly_url': friendly_url,
+                                'parameters': get_parameters_auto_suggest(crits)}
 
 
 def get_friendly_search_params(crits):
     zap_friendly_search_params = \
         '{{"Transacao":"Locacao",' \
         '"SubtipoImovel":"apartamento-padrao",' \
-        '"ParametrosAutoSuggest":[{{"Bairro":"{}","Cidade":"{}","Estado":"{}","Zona":"{}"}}],' \
+        '"ParametrosAutoSuggest":{},' \
         '"TipoOferta":"Imovel",' \
         '"PaginaOrigem":"Home",' \
-        '"Pagina":1}}'.format(get_crit_value(crits, 'bairro'), get_crit_value(crits, 'cidade'),
-                              get_crit_value(crits, 'sigla'), get_crit_value(crits, 'zona'))
+        '"Pagina":1}}'.format(get_parameters_auto_suggest(crits))
     return {'parametrosBusca': zap_friendly_search_params, 'origem': 'Home'}
+
+
+def get_parameters_auto_suggest(crits):
+    return '[{{"Bairro":"{}","Cidade":"{}","Estado":"{}","Zona":"{}"}}]'.format(
+        get_crit_value(crits, 'bairro'), get_crit_value(crits, 'cidade'),
+        get_crit_value(crits, 'sigla'), get_crit_value(crits, 'zona'))
 
 
 def get_crit_value(crits, name):
@@ -88,8 +95,7 @@ def main():
     query = input('Enter search term: ')
     process = CrawlerProcess(get_project_settings())
     process.crawl(VivaRealSpider, **get_vr_crawl_params(query))
-    # TODO receive args in zap spider
-    # process.crawl(ZapSpider)
+    process.crawl(ZapSpider, **get_zap_crawl_params(query))
     process.start()
 
 
