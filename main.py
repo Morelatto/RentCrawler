@@ -92,10 +92,10 @@ def get_crit_value(crits, name):
 
 
 def main():
-    query = input('Enter search term: ')
+    # query = input('Enter search term: ')
     process = CrawlerProcess(get_project_settings())
-    process.crawl(VivaRealSpider, **get_vr_crawl_params(query))
-    process.crawl(ZapSpider, **get_zap_crawl_params(query))
+    process.crawl(VivaRealSpider)
+    # process.crawl(ZapSpider, **get_zap_crawl_params(query))
     process.start()
 
 

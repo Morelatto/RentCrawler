@@ -3,6 +3,7 @@ import os
 
 import scrapy
 from scrapy.pipelines.images import ImagesPipeline
+from scrapy_dynamodb import DynamoDbPipeline
 
 INFO_FILE_NAME = 'info'
 
@@ -27,3 +28,7 @@ class ApartmentPicturesPipeline(ImagesPipeline):
         os.makedirs(path, exist_ok=True)
         with open('{}/{}.txt'.format(path, INFO_FILE_NAME), 'w+') as f:
             f.write(str(item))
+
+
+class AwsDynamoDbPipeline(DynamoDbPipeline):
+    pass
