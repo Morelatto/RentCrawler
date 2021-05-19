@@ -1,6 +1,5 @@
 import datetime
 import json
-from typing import Iterator
 
 import scrapy
 from scrapy.loader import ItemLoader
@@ -56,7 +55,7 @@ class VivaRealSpider(scrapy.Spider):
     def start_requests(self):
         page = 0
         while page <= MAX_PAGE:
-            yield scrapy.Request(self.start_url.format(size=PAGE_SIZE, from_=page), headers=self.headers)
+            yield scrapy.Request(self.start_url.format(size=PAGE_SIZE, from_=page * PAGE_SIZE), headers=self.headers)
             page += 1
 
     def parse(self, response, **kwargs) -> Apartment:
@@ -86,7 +85,7 @@ class VivaRealSpider(scrapy.Spider):
         return address_loader.load_item()
 
     @classmethod
-    def get_prices(cls, json_prices: list[dict]) -> Iterator[Prices]:
+    def get_prices(cls, json_prices):
         for json_price in json_prices:
             prices_loader = PricesLoader()
             prices_loader.add_value('rent', json_price.get('price'))
