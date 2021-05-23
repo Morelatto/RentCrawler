@@ -82,7 +82,6 @@ class Apartment(Item):
     details = Field(serializer=Details)
     text_details = Field(serializer=TextDetails)
     media = Field(serializer=MediaDetails)
-    source = Field()
     scrapped_at = Field()
     url = Field()
 
