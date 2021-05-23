@@ -84,6 +84,7 @@ class Apartment(Item):
     media = Field(serializer=MediaDetails)
     source = Field()
     scrapped_at = Field()
+    url = Field()
 
 
 class ApartmentLoader(ItemLoader):

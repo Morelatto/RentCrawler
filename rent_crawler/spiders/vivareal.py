@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import scrapy
@@ -42,9 +42,10 @@ class VivaRealSpider(scrapy.Spider):
                 '&ref=%2Faluguel%2Fsp%2Fsao-paulo%2Fapartamento_residencial%2F' \
                 '&pointRadius='
     headers = {'x-domain': 'www.vivareal.com.br'}
+    custom_settings = {'DYNAMODB_PIPELINE_TABLE_NAME': 'vr-items'}
 
-    def __init__(self, start_page=1, pages_to_crawl=10, *args, **kwargs):
-        super(VivaRealSpider, self).__init__(*args, **kwargs)
+    def __init__(self, start_page=1, pages_to_crawl=50, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.start_page = start_page
         self.pages_to_crawl = pages_to_crawl
 
@@ -67,7 +68,8 @@ class VivaRealSpider(scrapy.Spider):
             loader.add_value('text_details', self.get_text_details(listing))
             loader.add_value('media', self.get_media_details(result['medias']))
             loader.add_value('source', VR_SOURCE)
-            loader.add_value('scrapped_at', datetime.datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat())
+            loader.add_value('scrapped_at', datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat())
+            loader.add_value('url', result['link']['href'])
             yield loader.load_item()
 
     @classmethod
