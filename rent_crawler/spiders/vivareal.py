@@ -5,61 +5,58 @@ import scrapy
 from scrapy.loader import ItemLoader
 
 from rent_crawler.items import ApartmentLoader, AddressLoader, PricesLoader, DetailsLoader
-from rent_crawler.items import Apartment, Address, Prices, Details, TextDetails, MediaDetails
+from rent_crawler.items import Apartment, Address, Details, TextDetails, MediaDetails
 
 PAGE_SIZE = 36
-MAX_PAGE = 10
 VR_SOURCE = 'VR'
 
 
 class VivaRealSpider(scrapy.Spider):
     name = 'vivareal'
-    start_url = 'https://glue-api.vivareal.com/v2/listings?addressCity=S%C3%A3o%20Paulo&addressLocationId=BR%3ESao' \
-                '%20Paulo%3ENULL%3ESao%20Paulo&addressNeighborhood=&addressState=S%C3%A3o%20Paulo&addressCountry' \
-                '=Brasil&addressStreet=&addressZone=&addressPointLat=-23.55052&addressPointLon=-46.633309&business' \
-                '=RENTAL&facets=amenities&unitTypes=&unitSubTypes=&unitTypesV3=&usageTypes=&listingType=USED&parentId' \
-                '=null&categoryPage=RESULT&includeFields=search(result(listings(listing(' \
-                'displayAddressType%2Camenities%2CusableAreas%2CconstructionStatus%2ClistingType%2Cdescription' \
-                '%2Ctitle%2CunitTypes%2CnonActivationReason%2CpropertyType%2CunitSubTypes%2Cid%2Cportal' \
-                '%2CparkingSpaces%2Caddress%2Csuites%2CpublicationType%2CexternalId%2Cbathrooms%2CusageTypes' \
-                '%2CtotalAreas%2CadvertiserId%2Cbedrooms%2CpricingInfos%2CshowPrice%2Cstatus%2CadvertiserContact' \
-                '%2CvideoTourLink%2CwhatsappNumber%2Cstamps)%2Caccount(' \
-                'id%2Cname%2ClogoUrl%2ClicenseNumber%2CshowAddress%2ClegacyVivarealId%2Cphones)%2Cmedias' \
-                '%2CaccountLink%2Clink))%2CtotalCount)%2Cpage%2CseasonalCampaigns%2CfullUriFragments%2Cnearby(search(' \
-                'result(listings(listing(displayAddressType%2Camenities%2CusableAreas%2CconstructionStatus' \
-                '%2ClistingType%2Cdescription%2Ctitle%2CunitTypes%2CnonActivationReason%2CpropertyType%2CunitSubTypes' \
-                '%2Cid%2Cportal%2CparkingSpaces%2Caddress%2Csuites%2CpublicationType%2CexternalId%2Cbathrooms' \
-                '%2CusageTypes%2CtotalAreas%2CadvertiserId%2Cbedrooms%2CpricingInfos%2CshowPrice%2Cstatus' \
-                '%2CadvertiserContact%2CvideoTourLink%2CwhatsappNumber%2Cstamps)%2Caccount(' \
-                'id%2Cname%2ClogoUrl%2ClicenseNumber%2CshowAddress%2ClegacyVivarealId%2Cphones)%2Cmedias' \
-                '%2CaccountLink%2Clink))%2CtotalCount))%2Cexpansion(search(result(listings(listing(' \
-                'displayAddressType%2Camenities%2CusableAreas%2CconstructionStatus%2ClistingType%2Cdescription' \
-                '%2Ctitle%2CunitTypes%2CnonActivationReason%2CpropertyType%2CunitSubTypes%2Cid%2Cportal' \
-                '%2CparkingSpaces%2Caddress%2Csuites%2CpublicationType%2CexternalId%2Cbathrooms%2CusageTypes' \
-                '%2CtotalAreas%2CadvertiserId%2Cbedrooms%2CpricingInfos%2CshowPrice%2Cstatus%2CadvertiserContact' \
-                '%2CvideoTourLink%2CwhatsappNumber%2Cstamps)%2Caccount(' \
-                'id%2Cname%2ClogoUrl%2ClicenseNumber%2CshowAddress%2ClegacyVivarealId%2Cphones)%2Cmedias' \
-                '%2CaccountLink%2Clink))%2CtotalCount))%2Caccount(' \
-                'id%2Cname%2ClogoUrl%2ClicenseNumber%2CshowAddress%2ClegacyVivarealId%2Cphones%2Cphones)%2Cowners(' \
-                'search(result(listings(listing(' \
-                'displayAddressType%2Camenities%2CusableAreas%2CconstructionStatus%2ClistingType%2Cdescription' \
-                '%2Ctitle%2CunitTypes%2CnonActivationReason%2CpropertyType%2CunitSubTypes%2Cid%2Cportal' \
-                '%2CparkingSpaces%2Caddress%2Csuites%2CpublicationType%2CexternalId%2Cbathrooms%2CusageTypes' \
-                '%2CtotalAreas%2CadvertiserId%2Cbedrooms%2CpricingInfos%2CshowPrice%2Cstatus%2CadvertiserContact' \
-                '%2CvideoTourLink%2CwhatsappNumber%2Cstamps)%2Caccount(' \
-                'id%2Cname%2ClogoUrl%2ClicenseNumber%2CshowAddress%2ClegacyVivarealId%2Cphones)%2Cmedias' \
-                '%2CaccountLink%2Clink))%2CtotalCount))&size={size}&from={from_}' \
-                '&q=&developmentsSize=5&__vt=&levels=CITY&ref=%2Faluguel%2Fsp%2Fsao-paulo%2F&pointRadius='
+    start_url = 'https://glue-api.vivareal.com/v2/listings?' \
+                'addressCity=S%C3%A3o%20Paulo' \
+                '&addressLocationId=BR%3ESao%20Paulo%3ENULL%3ESao%20Paulo' \
+                '&addressNeighborhood=' \
+                '&addressState=S%C3%A3o%20Paulo' \
+                '&addressCountry=Brasil' \
+                '&addressStreet=' \
+                '&addressZone=' \
+                '&addressPointLat=-23.55052' \
+                '&addressPointLon=-46.633309' \
+                '&business=RENTAL' \
+                '&facets=amenities' \
+                '&unitTypes=APARTMENT%2CHOME%2CHOME%2CCOUNTRY_HOUSE%2CAPARTMENT%2CAPARTMENT%2CAPARTMENT%2CHOME%2CRESIDENTIAL_BUILDING%2CFARM%2CALLOTMENT_LAND' \
+                '&unitSubTypes=UnitSubType_NONE%2CDUPLEX%2CLOFT%2CSTUDIO%2CTRIPLEX%7CUnitSubType_NONE%2CSINGLE_STOREY_HOUSE%2CVILLAGE_HOUSE%2CKITNET%7CCONDOMINIUM%7CUnitSubType_NONE%7CPENTHOUSE%7CFLAT%7CKITNET%7CTWO_STORY_HOUSE%7CUnitSubType_NONE%7CUnitSubType_NONE%2CCONDOMINIUM%7CUnitSubType_NONE%2CCONDOMINIUM%2CVILLAGE_HOUSE' \
+                '&unitTypesV3=APARTMENT%2CHOME%2CCONDOMINIUM%2CCOUNTRY_HOUSE%2CPENTHOUSE%2CFLAT%2CKITNET%2CTWO_STORY_HOUSE%2CRESIDENTIAL_BUILDING%2CFARM%2CRESIDENTIAL_ALLOTMENT_LAND' \
+                '&usageTypes=RESIDENTIAL%2CRESIDENTIAL%2CRESIDENTIAL%2CRESIDENTIAL%2CRESIDENTIAL%2CRESIDENTIAL%2CRESIDENTIAL%2CRESIDENTIAL%2CRESIDENTIAL%2CRESIDENTIAL%2CRESIDENTIAL' \
+                '&listingType=USED' \
+                '&parentId=null' \
+                '&categoryPage=RESULT' \
+                '&includeFields=search(result(listings(listing(displayAddressType%2Camenities%2CusableAreas%2CconstructionStatus%2ClistingType%2Cdescription%2Ctitle%2CunitTypes%2CnonActivationReason%2CpropertyType%2CunitSubTypes%2Cid%2Cportal%2CparkingSpaces%2Caddress%2Csuites%2CpublicationType%2CexternalId%2Cbathrooms%2CusageTypes%2CtotalAreas%2CadvertiserId%2Cbedrooms%2CpricingInfos%2CshowPrice%2Cstatus%2CadvertiserContact%2CvideoTourLink%2CwhatsappNumber%2Cstamps)%2Caccount(id%2Cname%2ClogoUrl%2ClicenseNumber%2CshowAddress%2ClegacyVivarealId%2Cphones)%2Cmedias%2CaccountLink%2Clink))%2CtotalCount)%2Cpage%2CseasonalCampaigns%2CfullUriFragments%2Cnearby(search(result(listings(listing(displayAddressType%2Camenities%2CusableAreas%2CconstructionStatus%2ClistingType%2Cdescription%2Ctitle%2CunitTypes%2CnonActivationReason%2CpropertyType%2CunitSubTypes%2Cid%2Cportal%2CparkingSpaces%2Caddress%2Csuites%2CpublicationType%2CexternalId%2Cbathrooms%2CusageTypes%2CtotalAreas%2CadvertiserId%2Cbedrooms%2CpricingInfos%2CshowPrice%2Cstatus%2CadvertiserContact%2CvideoTourLink%2CwhatsappNumber%2Cstamps)%2Caccount(id%2Cname%2ClogoUrl%2ClicenseNumber%2CshowAddress%2ClegacyVivarealId%2Cphones)%2Cmedias%2CaccountLink%2Clink))%2CtotalCount))%2Cexpansion(search(result(listings(listing(displayAddressType%2Camenities%2CusableAreas%2CconstructionStatus%2ClistingType%2Cdescription%2Ctitle%2CunitTypes%2CnonActivationReason%2CpropertyType%2CunitSubTypes%2Cid%2Cportal%2CparkingSpaces%2Caddress%2Csuites%2CpublicationType%2CexternalId%2Cbathrooms%2CusageTypes%2CtotalAreas%2CadvertiserId%2Cbedrooms%2CpricingInfos%2CshowPrice%2Cstatus%2CadvertiserContact%2CvideoTourLink%2CwhatsappNumber%2Cstamps)%2Caccount(id%2Cname%2ClogoUrl%2ClicenseNumber%2CshowAddress%2ClegacyVivarealId%2Cphones)%2Cmedias%2CaccountLink%2Clink))%2CtotalCount))%2Caccount(id%2Cname%2ClogoUrl%2ClicenseNumber%2CshowAddress%2ClegacyVivarealId%2Cphones%2Cphones)%2Cfacets%2Cowners(search(result(listings(listing(displayAddressType%2Camenities%2CusableAreas%2CconstructionStatus%2ClistingType%2Cdescription%2Ctitle%2CunitTypes%2CnonActivationReason%2CpropertyType%2CunitSubTypes%2Cid%2Cportal%2CparkingSpaces%2Caddress%2Csuites%2CpublicationType%2CexternalId%2Cbathrooms%2CusageTypes%2CtotalAreas%2CadvertiserId%2Cbedrooms%2CpricingInfos%2CshowPrice%2Cstatus%2CadvertiserContact%2CvideoTourLink%2CwhatsappNumber%2Cstamps)%2Caccount(id%2Cname%2ClogoUrl%2ClicenseNumber%2CshowAddress%2ClegacyVivarealId%2Cphones)%2Cmedias%2CaccountLink%2Clink))%2CtotalCount))' \
+                '&size={size}' \
+                '&from={from_}' \
+                '&q=' \
+                '&developmentsSize=5' \
+                '&__vt=' \
+                '&levels=CITY' \
+                '&ref=%2Faluguel%2Fsp%2Fsao-paulo%2Fapartamento_residencial%2F' \
+                '&pointRadius='
     headers = {'x-domain': 'www.vivareal.com.br'}
 
+    def __init__(self, start_page=1, pages_to_crawl=10, *args, **kwargs):
+        super(VivaRealSpider, self).__init__(*args, **kwargs)
+        self.start_page = start_page
+        self.pages_to_crawl = pages_to_crawl
+
     def start_requests(self):
-        page = 0
-        while page <= MAX_PAGE:
-            yield scrapy.Request(self.start_url.format(size=PAGE_SIZE, from_=page * PAGE_SIZE), headers=self.headers)
+        page = self.start_page
+        while page <= self.pages_to_crawl:
+            req_url = self.start_url.format(size=PAGE_SIZE, from_=(page - 1) * PAGE_SIZE)
+            yield scrapy.Request(url=req_url, headers=self.headers)
             page += 1
 
     def parse(self, response, **kwargs) -> Apartment:
-        json_response = json.loads(response.body_as_unicode())
+        json_response = response.json()
         for result in json_response['search']['result']['listings']:
             listing = result['listing']
             loader = ApartmentLoader()
@@ -85,7 +82,7 @@ class VivaRealSpider(scrapy.Spider):
         return address_loader.load_item()
 
     @classmethod
-    def get_prices(cls, json_prices):
+    def get_prices(cls, json_prices: list):
         for json_price in json_prices:
             prices_loader = PricesLoader()
             prices_loader.add_value('rent', json_price.get('price'))

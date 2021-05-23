@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 BOT_NAME = 'rent_crawler'
 
 SPIDER_MODULES = ['rent_crawler.spiders']
@@ -12,12 +11,11 @@ DOWNLOAD_DELAY = 5
 
 TELNETCONSOLE_ENABLED = False
 EXTENSIONS = {
-    'scrapy.extensions.telnet.TelnetConsole': None,
+    'scrapy.extensions.telnet.TelnetConsole': None
 }
 
 ITEM_PIPELINES = {
-    'rent_crawler.pipelines.AwsDynamoDbPipeline': 1,
-    # 'rent_crawler.pipelines.ApartmentPicturesPipeline': 1
+    'rent_crawler.pipelines.AwsDynamoDbPipeline': 1
 }
 
 AWS_ACCESS_KEY_ID = ''
@@ -27,7 +25,5 @@ DYNAMODB_PIPELINE_TABLE_NAME = 'vr-items'
 
 # LOG_STDOUT = True
 # LOG_FILE = 'spider_log.txt'
-
-# IMAGES_STORE = 'pictures/'
 
 # HTTPERROR_ALLOW_ALL = True
