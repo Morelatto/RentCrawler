@@ -7,7 +7,10 @@ NEWSPIDER_MODULE = 'rent_crawler.spiders'
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 ' \
              'Safari/601.3.9 '
 
-DOWNLOAD_DELAY = 5
+AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_DEBUG = True
+
+CONCURRENT_REQUESTS_PER_DOMAIN = 2
 
 TELNETCONSOLE_ENABLED = False
 EXTENSIONS = {

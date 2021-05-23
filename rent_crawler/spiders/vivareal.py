@@ -1,5 +1,5 @@
 import datetime
-import json
+from zoneinfo import ZoneInfo
 
 import scrapy
 from scrapy.loader import ItemLoader
@@ -67,7 +67,7 @@ class VivaRealSpider(scrapy.Spider):
             loader.add_value('text_details', self.get_text_details(listing))
             loader.add_value('media', self.get_media_details(result['medias']))
             loader.add_value('source', VR_SOURCE)
-            loader.add_value('scrapped_at', datetime.datetime.now())
+            loader.add_value('scrapped_at', datetime.datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat())
             yield loader.load_item()
 
     @classmethod
