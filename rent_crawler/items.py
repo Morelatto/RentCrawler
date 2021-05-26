@@ -41,6 +41,8 @@ class Prices(Item):
     rent = Field()
     condo = Field()
     iptu = Field()
+    iptu_and_condo = Field()
+    total = Field()
 
 
 class PricesLoader(ItemLoader):
@@ -73,9 +75,10 @@ class TextDetails(Item):
 class MediaDetails(Item):
     images = Field(input_processor=filter_images, output_processor=format_image_url)
     video = Field(input_processor=filter_videos)
+    images_with_caption = Field()
 
 
-class Apartment(Item):
+class Property(Item):
     code = Field(input_processor=parse_float_or_int)
     address = Field(serializer=Address)
     prices = Field(serializer=Prices)
@@ -84,8 +87,9 @@ class Apartment(Item):
     media = Field(serializer=MediaDetails)
     scrapped_at = Field()
     url = Field()
+    type = Field()
 
 
-class ApartmentLoader(ItemLoader):
-    default_item_class = Apartment
+class PropertyLoader(ItemLoader):
+    default_item_class = Property
     default_output_processor = TakeFirst()

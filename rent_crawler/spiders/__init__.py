@@ -4,8 +4,8 @@ from zoneinfo import ZoneInfo
 import scrapy
 from scrapy.loader import ItemLoader
 
-from rent_crawler.items import ApartmentLoader, AddressLoader, PricesLoader, DetailsLoader
-from rent_crawler.items import Apartment, Address, Details, TextDetails, MediaDetails
+from rent_crawler.items import PropertyLoader, AddressLoader, PricesLoader, DetailsLoader
+from rent_crawler.items import Property, Address, Details, TextDetails, MediaDetails
 
 
 class BaseVrZapSpider(scrapy.Spider):
@@ -15,11 +15,11 @@ class BaseVrZapSpider(scrapy.Spider):
         self.start_page = start_page
         self.pages_to_crawl = pages_to_crawl
 
-    def parse(self, response, **kwargs) -> Apartment:
+    def parse(self, response, **kwargs) -> Property:
         json_response = response.json()
         for result in json_response['search']['result']['listings']:
             listing = result['listing']
-            loader = ApartmentLoader()
+            loader = PropertyLoader()
             loader.add_value('code', listing['id'])
             loader.add_value('address', self.get_address(listing['address']))
             loader.add_value('prices', self.get_prices(listing['pricingInfos']))
