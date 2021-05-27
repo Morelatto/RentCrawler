@@ -87,7 +87,7 @@ class Property(Item):
     media = Field(serializer=MediaDetails)
     scrapped_at = Field()
     url = Field()
-    type = Field()
+    type = Field(output_processor=TakeFirst())
 
 
 class PropertyLoader(ItemLoader):

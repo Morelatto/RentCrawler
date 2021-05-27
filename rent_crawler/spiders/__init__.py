@@ -28,6 +28,7 @@ class BaseVrZapSpider(scrapy.Spider):
             loader.add_value('media', self.get_media_details(result['medias']))
             loader.add_value('scrapped_at', datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat())
             loader.add_value('url', result['link']['href'])
+            loader.add_value('type', listing['unitTypes'])
             yield loader.load_item()
 
     @classmethod
@@ -48,6 +49,7 @@ class BaseVrZapSpider(scrapy.Spider):
             prices_loader.add_value('rent', json_price.get('price'))
             prices_loader.add_value('condo', json_price.get('monthlyCondoFee'))
             prices_loader.add_value('iptu', json_price.get('yearlyIptu'))
+            prices_loader.add_value('total', json_price.get('rentalInfo', {}).get('monthlyRentalTotalPrice'))
             yield prices_loader.load_item()
 
     @classmethod

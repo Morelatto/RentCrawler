@@ -80,8 +80,11 @@ class QuintoAndarSpider(scrapy.Spider):
 
     @classmethod
     def get_media_details(cls, json_source: dict) -> MediaDetails:
-        caption_list = json_source.get('imageCaptionList')
         media_details_loader = ItemLoader(item=MediaDetails())
-        for i, v in enumerate(json_source.get('imageList')):
-            media_details_loader.add_value('images_with_caption', {caption_list[i]: f"{SITE_URL}/img/med/{v}"})
+        caption_list = json_source.get('imageCaptionList')
+        if caption_list:
+            media_list = {}
+            for i, v in enumerate(json_source.get('imageList', [])):
+                media_list[caption_list[i]] = f"{SITE_URL}/img/med/{v}"
+            media_details_loader.add_value('images_with_caption', media_list)
         return media_details_loader.load_item()
