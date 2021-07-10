@@ -1,11 +1,8 @@
-from datetime import datetime
-from zoneinfo import ZoneInfo
-
 import scrapy
 from scrapy.loader import ItemLoader
 
-from rent_crawler.items import PropertyLoader, AddressLoader, PricesLoader, DetailsLoader
-from rent_crawler.items import Property, Address, Details, TextDetails, MediaDetails
+from rent_crawler.items import RentalPropertyLoader, AddressLoader, PricesLoader, DetailsLoader
+from rent_crawler.items import RentalProperty, Address, Details, TextDetails, MediaDetails
 
 
 class BaseVrZapSpider(scrapy.Spider):
@@ -15,18 +12,17 @@ class BaseVrZapSpider(scrapy.Spider):
         self.start_page = start_page
         self.pages_to_crawl = pages_to_crawl
 
-    def parse(self, response, **kwargs) -> Property:
+    def parse(self, response, **kwargs) -> RentalProperty:
         json_response = response.json()
         for result in json_response['search']['result']['listings']:
             listing = result['listing']
-            loader = PropertyLoader()
+            loader = RentalPropertyLoader()
             loader.add_value('code', listing['id'])
             loader.add_value('address', self.get_address(listing['address']))
             loader.add_value('prices', self.get_prices(listing['pricingInfos']))
             loader.add_value('details', self.get_details(listing))
             loader.add_value('text_details', self.get_text_details(listing))
             loader.add_value('media', self.get_media_details(result['medias']))
-            loader.add_value('scrapped_at', datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat())
             loader.add_value('url', result['link']['href'])
             loader.add_value('type', listing['unitTypes'])
             yield loader.load_item()

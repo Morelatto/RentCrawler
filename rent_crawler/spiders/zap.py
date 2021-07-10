@@ -36,8 +36,12 @@ class ZapSpider(BaseVrZapSpider):
                 '&addressLocationId=BR%3ESao+Paulo%3ENULL%3ESao+Paulo' \
                 '&addressPointLat=-23.55052' \
                 '&addressPointLon=-46.633309'
-    headers = {'x-domain': 'www.zapimoveis.com.br'}
-    custom_settings = {'DYNAMODB_PIPELINE_TABLE_NAME': 'zap-items'}
+    headers = {
+        'x-domain': 'www.zapimoveis.com.br'
+    }
+    custom_settings = {
+        'DYNAMODB_PIPELINE_TABLE_NAME': 'zap-items'
+    }
 
     def start_requests(self):
         page = self.start_page

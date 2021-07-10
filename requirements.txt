@@ -1,2 +1,4 @@
 Scrapy==2.5.0
 scrapy-dynamodb==0.2.3
+redis==3.5.3
+backports.zoneinfo;python_version<"3.9"

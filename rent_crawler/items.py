@@ -78,7 +78,7 @@ class MediaDetails(Item):
     images_with_caption = Field()
 
 
-class Property(Item):
+class RentalProperty(Item):
     code = Field(input_processor=parse_float_or_int)
     address = Field(serializer=Address)
     prices = Field(serializer=Prices)
@@ -88,8 +88,9 @@ class Property(Item):
     scrapped_at = Field()
     url = Field()
     type = Field(output_processor=TakeFirst())
+    item_id = Field()
 
 
-class PropertyLoader(ItemLoader):
-    default_item_class = Property
+class RentalPropertyLoader(ItemLoader):
+    default_item_class = RentalProperty
     default_output_processor = TakeFirst()

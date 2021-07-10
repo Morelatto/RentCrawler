@@ -35,8 +35,12 @@ class VivaRealSpider(BaseVrZapSpider):
                 '&levels=CITY' \
                 '&ref=%2Faluguel%2Fsp%2Fsao-paulo%2Fapartamento_residencial%2F' \
                 '&pointRadius='
-    headers = {'x-domain': 'www.vivareal.com.br'}
-    custom_settings = {'DYNAMODB_PIPELINE_TABLE_NAME': 'vr-items'}
+    headers = {
+        'x-domain': 'www.vivareal.com.br'
+    }
+    custom_settings = {
+        'DYNAMODB_PIPELINE_TABLE_NAME': 'vr-items'
+    }
 
     def start_requests(self):
         page = self.start_page
