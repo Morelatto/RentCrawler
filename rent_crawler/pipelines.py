@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+import datetime
 import hashlib
 import json
 import logging
-from datetime import datetime
+import time
 try:
     import zoneinfo
 except ImportError:
@@ -14,7 +15,6 @@ from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
 from scrapy_dynamodb import DynamoDbPipeline
 
-
 logging.getLogger('boto3').setLevel(logging.ERROR)
 logging.getLogger('botocore').setLevel(logging.ERROR)
 
@@ -25,8 +25,9 @@ class RentCrawlerPipeline:
         j = json.dumps(ItemAdapter(item).asdict(), sort_keys=True)
         m.update(j.encode('utf-8'))
         item['item_id'] = m.hexdigest()
-        item['scrapped_at'] = datetime.now(zoneinfo.ZoneInfo("America/Sao_Paulo")).isoformat()
-        return item
+        item['scrapped_at'] = datetime.datetime.now(zoneinfo.ZoneInfo("America/Sao_Paulo")).isoformat()
+        item['timestamp'] = time.time()
+        return ItemAdapter(item).asdict()
 
 
 class RedisDuplicatePipeline:
