@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import time
+
 try:
     import zoneinfo
 except ImportError:
@@ -26,7 +27,7 @@ class RentCrawlerPipeline:
         m.update(j.encode('utf-8'))
         item['item_id'] = m.hexdigest()
         item['scrapped_at'] = datetime.datetime.now(zoneinfo.ZoneInfo("America/Sao_Paulo")).isoformat()
-        item['timestamp'] = time.time()
+        item['timestamp'] = round(time.time())
         return ItemAdapter(item).asdict()
 
 

@@ -2,6 +2,6 @@
 venv/
 pictures/
 build/
-project.egg-info/
+*.egg-info/
 __pycache__/
 *.sql

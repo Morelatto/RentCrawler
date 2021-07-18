@@ -86,6 +86,7 @@ class RentalProperty(Item):
     text_details = Field(serializer=TextDetails)
     media = Field(serializer=MediaDetails)
     scrapped_at = Field()
+    timestamp = Field()
     url = Field()
     type = Field(output_processor=TakeFirst())
     item_id = Field()
