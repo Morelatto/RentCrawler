@@ -39,7 +39,8 @@ class VivaRealSpider(BaseVrZapSpider):
         'x-domain': 'www.vivareal.com.br'
     }
     custom_settings = {
-        'DYNAMODB_PIPELINE_TABLE_NAME': 'vr-items'
+        'DYNAMODB_PIPELINE_TABLE_NAME': 'vr-items',
+        'ELASTICSEARCH_TYPE': 'vivareal'
     }
 
     def start_requests(self):

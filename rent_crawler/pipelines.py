@@ -32,6 +32,12 @@ class RentCrawlerPipeline:
 
 
 class RedisDuplicatePipeline:
+    key_prefix = {
+        'vivareal': 'VR:',
+        'zap': 'ZAP:',
+        'quintoandar': 'QUINTO:',
+    }
+
     def __init__(self, redis_host, redis_port):
         if redis_host is not None:
             self.redis_client = redis.Redis(host=redis_host, port=redis_port)
@@ -49,10 +55,11 @@ class RedisDuplicatePipeline:
 
         if 'item_id' in item:
             item_id = item['item_id']
-            existing_id = self.redis_client.get(item_id)
+            redis_id = self.key_prefix[spider.name] + item_id
+            existing_id = self.redis_client.get(redis_id)
             if existing_id is not None:
                 raise DropItem(f"Duplicate item found: {item}")
-            self.redis_client.set(item_id, 'SEEN')
+            self.redis_client.set(redis_id, 'SEEN')
 
         return item
 

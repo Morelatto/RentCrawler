@@ -63,12 +63,13 @@ class QuintoAndarSpider(scrapy.Spider):
     }
     custom_settings = {
         'DYNAMODB_PIPELINE_TABLE_NAME': 'quintoandar-items',
+        'ELASTICSEARCH_TYPE': 'quintoandar'
     }
 
     def __init__(self, start_page=1, pages_to_crawl=1, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.start_page = start_page
-        self.pages_to_crawl = pages_to_crawl
+        self.start_page = int(start_page)
+        self.pages_to_crawl = int(pages_to_crawl)
 
     def start_requests(self):
         page = self.start_page

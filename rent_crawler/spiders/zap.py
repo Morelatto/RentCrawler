@@ -40,7 +40,8 @@ class ZapSpider(BaseVrZapSpider):
         'x-domain': 'www.zapimoveis.com.br'
     }
     custom_settings = {
-        'DYNAMODB_PIPELINE_TABLE_NAME': 'zap-items'
+        'DYNAMODB_PIPELINE_TABLE_NAME': 'zap-items',
+        'ELASTICSEARCH_TYPE': 'zap'
     }
 
     def start_requests(self):
