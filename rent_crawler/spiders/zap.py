@@ -46,7 +46,7 @@ class ZapSpider(BaseVrZapSpider):
 
     def start_requests(self):
         page = self.start_page
-        while page <= self.pages_to_crawl:
+        while page < self.start_page + self.pages_to_crawl:
             req_url = self.start_url.format(size=PAGE_SIZE, from_=(page - 1) * PAGE_SIZE, page=page)
             yield scrapy.Request(url=req_url, headers=self.headers)
             page += 1

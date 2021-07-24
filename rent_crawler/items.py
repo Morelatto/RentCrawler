@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import re
-
 from scrapy import Item, Field
 from scrapy.loader import ItemLoader
-from itemloaders.processors import MapCompose, TakeFirst, Compose, Join
+from itemloaders.processors import MapCompose, TakeFirst, Join
 from w3lib.html import replace_tags
 
 
@@ -14,8 +12,6 @@ def process_float_or_int(value):
         return value
 
 
-parse_number = Compose(TakeFirst(), lambda string: re.findall(r'\d+|$', str(string))[0])
-parse_currency = Compose(TakeFirst(), lambda price: price.split('R$ ')[-1].replace('.', ''), float)
 parse_float_or_int = MapCompose(lambda x: process_float_or_int(x))
 strip = MapCompose(str.strip, replace_tags, lambda text: text if text != '' else None)
 join = Join(', ')
@@ -79,7 +75,7 @@ class MediaDetails(Item):
 
 
 class RentalProperty(Item):
-    code = Field(input_processor=parse_float_or_int)
+    code = Field()
     address = Field(serializer=Address)
     prices = Field(serializer=Prices)
     details = Field(serializer=Details)

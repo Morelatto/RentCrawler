@@ -5,7 +5,7 @@ SPIDER_MODULES = ['rent_crawler.spiders']
 NEWSPIDER_MODULE = 'rent_crawler.spiders'
 
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 ' \
-             'Safari/601.3.9 '
+             'Safari/601.3.9'
 
 DOWNLOAD_DELAY = 2
 DOWNLOAD_TIMEOUT = 30
@@ -34,6 +34,7 @@ DYNAMODB_PIPELINE_REGION_NAME = 'sa-east-1'
 ELASTICSEARCH_SERVERS = ['']
 ELASTICSEARCH_INDEX = 'rent-items'
 ELASTICSEARCH_INDEX_DATE_FORMAT = '%d-%m-%Y'
+ELASTICSEARCH_UNIQ_KEY = 'code'
 
 REDIS_HOST = ''
 REDIS_PORT = 6379

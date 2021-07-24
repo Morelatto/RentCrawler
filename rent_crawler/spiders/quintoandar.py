@@ -73,7 +73,7 @@ class QuintoAndarSpider(scrapy.Spider):
 
     def start_requests(self):
         page = self.start_page
-        while page <= self.pages_to_crawl:
+        while page < self.start_page + self.pages_to_crawl:
             json_data = json.dumps(json.loads(self.data.format(page_size=PAGE_SIZE, offset=(page - 1) * PAGE_SIZE)))
             yield scrapy.Request(url=self.start_url, method='POST', headers=self.headers, body=json_data)
             page += 1
