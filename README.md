@@ -23,7 +23,7 @@ O projeto foi desenvolvido com o objetivo de agregar as informações disponíve
 * rent_crawler/settings.py
 
 ```py
-# Chave de acesso AWS para acessar o DynamoDB
+# Chave de acesso AWS para o DynamoDB
 AWS_ACCESS_KEY_ID = ''
 AWS_SECRET_ACCESS_KEY = ''
 
