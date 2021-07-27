@@ -1,6 +1,6 @@
 # RentCrawler
 
-Crawlers para sites de aluguel com persistência de dados em banco não relacional e pipeline de deduplicação de itens usando banco em memória. Os itens são enviados para um cluster Elasticsearch para serem analisados e visualizados no Kibana.
+Crawlers para sites de aluguel com persistência de dados em banco não relacional e deduplicação de itens usando banco em memória. Os itens são enviados para um cluster Elasticsearch para serem analisados e visualizados no Kibana.
 
 O projeto foi desenvolvido com o objetivo de agregar as informações disponíveis em vários sites de aluguel em um único local para facilitar a busca de um novo apartamento e ter mais parâmetros de busca além dos que os sites disponibilizam.
 
@@ -32,9 +32,8 @@ DYNAMODB_PIPELINE_REGION_NAME = 'sa-east-1'
 # Elasticsearch 
 ELASTICSEARCH_SERVERS = ['']
 ELASTICSEARCH_INDEX = 'rent-items'
-ELASTICSEARCH_INDEX_DATE_FORMAT = '%d-%m-%Y'
 ELASTICSEARCH_UNIQ_KEY = 'code'
-
+ELASTICSEARCH_BUFFER_LENGTH = 250
 # Redis
 REDIS_HOST = ''
 REDIS_PORT = 6379
