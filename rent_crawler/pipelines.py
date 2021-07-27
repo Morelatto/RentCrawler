@@ -57,7 +57,7 @@ class RedisDuplicatePipeline:
             redis_id = f"{self.key_prefix[spider.name]}:{item['item_id']}"
             existing_id = self.redis_client.get(redis_id)
             if existing_id is not None:
-                raise DropItem(f"Duplicate item found: code={item['code']} item_id={item['item_id']}")
+                raise DropItem('Duplicate item found')
             self.redis_client.set(redis_id, 'SEEN')
 
         return item

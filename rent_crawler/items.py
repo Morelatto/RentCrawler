@@ -75,7 +75,7 @@ class MediaDetails(Item):
 
 
 class RentalProperty(Item):
-    code = Field()
+    code = Field(serializer=str)
     address = Field(serializer=Address)
     prices = Field(serializer=Prices)
     details = Field(serializer=Details)
