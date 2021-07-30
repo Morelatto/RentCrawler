@@ -62,8 +62,7 @@ class QuintoAndarSpider(scrapy.Spider):
         'Accept': 'application/pclick_sale.v0+json'
     }
     custom_settings = {
-        'DYNAMODB_PIPELINE_TABLE_NAME': 'quintoandar-items',
-        'ELASTICSEARCH_TYPE': 'quintoandar'
+        'ELASTICSEARCH_TYPE': name
     }
 
     def __init__(self, start_page=1, pages_to_crawl=1, *args, **kwargs):
