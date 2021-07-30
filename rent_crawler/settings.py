@@ -23,16 +23,18 @@ TELNETCONSOLE_ENABLED = False
 ITEM_PIPELINES = {
     'rent_crawler.pipelines.RentCrawlerPipeline': 100,
     'rent_crawler.pipelines.RedisDuplicatePipeline': 200,
-    'rent_crawler.pipelines.AwsDynamoDbPipeline': 300,
+    'scrapy_mongodb.MongoDBPipeline': 300,
     'scrapyelasticsearch.scrapyelasticsearch.ElasticSearchPipeline': 400
 }
 
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
-DYNAMODB_PIPELINE_REGION_NAME = 'sa-east-1'
+MONGODB_URI = ''
+MONGODB_DATABASE = 'rent'
+MONGODB_UNIQUE_KEY = 'code'
+MONGODB_ADD_TIMESTAMP = True
+MONGODB_SEPARATE_COLLECTIONS = True
 
 ELASTICSEARCH_SERVERS = ['']
-ELASTICSEARCH_INDEX = 'rent-items'
+ELASTICSEARCH_INDEX = 'rent'
 ELASTICSEARCH_UNIQ_KEY = 'code'
 ELASTICSEARCH_BUFFER_LENGTH = 250
 

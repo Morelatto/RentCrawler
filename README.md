@@ -12,9 +12,9 @@ O projeto foi desenvolvido com o objetivo de agregar as informações disponíve
 
 ## Requisitos
 
-- Python 3.9
+- Python 3.8+
 - Scrapy 2.5.0
-- DynamoDB
+- MongoDB
 - Redis
 - Elasticsearch
 
@@ -23,18 +23,17 @@ O projeto foi desenvolvido com o objetivo de agregar as informações disponíve
 * rent_crawler/settings.py
 
 ```py
-# Chave de acesso AWS para o DynamoDB
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
+MONGODB_URI = 'mongodb://'
+MONGODB_DATABASE = 'rent'
+MONGODB_UNIQUE_KEY = 'code'
+MONGODB_ADD_TIMESTAMP = True
+MONGODB_SEPARATE_COLLECTIONS = True
 
-DYNAMODB_PIPELINE_REGION_NAME = 'sa-east-1'
-
-# Elasticsearch 
 ELASTICSEARCH_SERVERS = ['']
 ELASTICSEARCH_INDEX = 'rent-items'
 ELASTICSEARCH_UNIQ_KEY = 'code'
 ELASTICSEARCH_BUFFER_LENGTH = 250
-# Redis
+
 REDIS_HOST = ''
 REDIS_PORT = 6379
 ```
@@ -60,7 +59,7 @@ Para rodar local e salvar os itens para um arquivo json sem enviar para nenhum b
 ITEM_PIPELINES = {
     'rent_crawler.pipelines.RentCrawlerPipeline': 100,
     'rent_crawler.pipelines.RedisDuplicatePipeline': 200,
-    'rent_crawler.pipelines.AwsDynamoDbPipeline': 300,
+    'scrapy_mongodb.MongoDBPipeline': 300,
     'scrapyelasticsearch.scrapyelasticsearch.ElasticSearchPipeline': 400
 }
 ```

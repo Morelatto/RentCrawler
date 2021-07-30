@@ -1,23 +1,10 @@
 # -*- coding: utf-8 -*-
-import datetime
 import hashlib
 import json
-import logging
-import time
-
-try:
-    import zoneinfo
-except ImportError:
-    # noinspection PyUnresolvedReferences
-    from backports import zoneinfo
 
 import redis as redis
 from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
-from scrapy_dynamodb import DynamoDbPipeline
-
-logging.getLogger('boto3').setLevel(logging.ERROR)
-logging.getLogger('botocore').setLevel(logging.ERROR)
 
 
 class RentCrawlerPipeline:
@@ -26,8 +13,6 @@ class RentCrawlerPipeline:
         j = json.dumps(ItemAdapter(item).asdict(), sort_keys=True)
         m.update(j.encode('utf-8'))
         item['item_id'] = m.hexdigest()
-        item['scrapped_at'] = datetime.datetime.now(zoneinfo.ZoneInfo('America/Sao_Paulo')).isoformat()
-        item['timestamp'] = round(time.time())
         return ItemAdapter(item).asdict()
 
 
@@ -61,7 +46,3 @@ class RedisDuplicatePipeline:
             self.redis_client.set(redis_id, 'SEEN')
 
         return item
-
-
-class AwsDynamoDbPipeline(DynamoDbPipeline):
-    pass
