@@ -39,7 +39,7 @@ class VivaRealSpider(BaseVrZapSpider):
         'x-domain': 'www.vivareal.com.br'
     }
     custom_settings = {
-        'ELASTICSEARCH_TYPE': name
+        'ELASTICSEARCH_INDEX': 'rent-vrzap'
     }
 
     def start_requests(self):
