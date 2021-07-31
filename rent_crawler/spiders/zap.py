@@ -40,7 +40,7 @@ class ZapSpider(BaseVrZapSpider):
         'x-domain': 'www.zapimoveis.com.br'
     }
     custom_settings = {
-        'ELASTICSEARCH_TYPE': name
+        'ELASTICSEARCH_INDEX': 'rent-vrzap'
     }
 
     def start_requests(self):

@@ -2,7 +2,7 @@ import scrapy
 from scrapy.loader import ItemLoader
 
 from rent_crawler.items import RentalPropertyLoader, AddressLoader, PricesLoader, DetailsLoader
-from rent_crawler.items import RentalProperty, Address, Details, TextDetails, MediaDetails
+from rent_crawler.items import RentalProperty, Address, Details, TextDetails, VRZapMediaDetails
 
 
 class BaseVrZapSpider(scrapy.Spider):
@@ -69,8 +69,8 @@ class BaseVrZapSpider(scrapy.Spider):
         return text_details_loader.load_item()
 
     @classmethod
-    def get_media_details(cls, json_medias: list) -> MediaDetails:
-        media_details_loader = ItemLoader(item=MediaDetails())
+    def get_media_details(cls, json_medias: list) -> VRZapMediaDetails:
+        media_details_loader = ItemLoader(item=VRZapMediaDetails())
         media_details_loader.add_value('images', json_medias)
         media_details_loader.add_value('video', json_medias)
         return media_details_loader.load_item()

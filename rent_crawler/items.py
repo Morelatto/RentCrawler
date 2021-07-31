@@ -17,7 +17,8 @@ strip = MapCompose(str.strip, replace_tags, lambda text: text if text != '' else
 join = Join(', ')
 filter_images = MapCompose(lambda media: media.get('url') if media.get('type') == 'IMAGE' else None)
 filter_videos = MapCompose(lambda media: media.get('url') if media.get('type') == 'VIDEO' else None)
-format_image_url = MapCompose(lambda img: img.format(width=870, height=653, action='fit-in'))
+format_vrzap_image_url = MapCompose(lambda img: img.format(width=870, height=653, action='fit-in'))
+format_quintoandar_image_url = MapCompose(lambda img: "https://www.quintoandar.com.br/img/med/" + img)
 
 
 class Address(Item):
@@ -68,10 +69,13 @@ class TextDetails(Item):
     contact = Field()
 
 
-class MediaDetails(Item):
-    images = Field(input_processor=filter_images, output_processor=format_image_url)
+class QuintoAndarMediaDetails(Item):
+    images = Field(output_processor=format_quintoandar_image_url)
+
+
+class VRZapMediaDetails(Item):
+    images = Field(input_processor=filter_images, output_processor=format_vrzap_image_url)
     video = Field(input_processor=filter_videos)
-    images_with_caption = Field()
 
 
 class RentalProperty(Item):
@@ -80,11 +84,9 @@ class RentalProperty(Item):
     prices = Field(serializer=Prices)
     details = Field(serializer=Details)
     text_details = Field(serializer=TextDetails)
-    media = Field(serializer=MediaDetails)
-    scrapped_at = Field()
-    timestamp = Field()
+    media = Field()
     url = Field()
-    type = Field(output_processor=TakeFirst())
+    type = Field()
     item_id = Field()
 
 

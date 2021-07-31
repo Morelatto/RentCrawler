@@ -4,7 +4,7 @@ import scrapy
 from scrapy.loader import ItemLoader
 
 from rent_crawler.items import RentalPropertyLoader, AddressLoader, PricesLoader, DetailsLoader
-from rent_crawler.items import RentalProperty, Address, Prices, Details, MediaDetails
+from rent_crawler.items import RentalProperty, Address, Prices, Details, QuintoAndarMediaDetails
 
 PAGE_SIZE = 11
 SITE_URL = 'https://www.quintoandar.com.br'
@@ -62,7 +62,7 @@ class QuintoAndarSpider(scrapy.Spider):
         'Accept': 'application/pclick_sale.v0+json'
     }
     custom_settings = {
-        'ELASTICSEARCH_TYPE': name
+        'ELASTICSEARCH_INDEX': 'rent-quintoandar'
     }
 
     def __init__(self, start_page=1, pages_to_crawl=1, *args, **kwargs):
@@ -116,12 +116,7 @@ class QuintoAndarSpider(scrapy.Spider):
         return details_loader.load_item()
 
     @classmethod
-    def get_media_details(cls, json_source: dict) -> MediaDetails:
-        media_details_loader = ItemLoader(item=MediaDetails())
-        caption_list = json_source.get('imageCaptionList')
-        if caption_list:
-            media_list = {}
-            for i, v in enumerate(json_source.get('imageList', [])):
-                media_list[caption_list[i]] = f"{SITE_URL}/img/med/{v}"
-            media_details_loader.add_value('images_with_caption', media_list)
+    def get_media_details(cls, json_source: dict) -> QuintoAndarMediaDetails:
+        media_details_loader = ItemLoader(item=QuintoAndarMediaDetails())
+        media_details_loader.add_value('images', json_source.get('imageList'))
         return media_details_loader.load_item()
