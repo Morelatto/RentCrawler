@@ -24,7 +24,7 @@ ITEM_PIPELINES = {
     'rent_crawler.pipelines.RentCrawlerPipeline': 100,
     'rent_crawler.pipelines.RedisDuplicatePipeline': 200,
     'scrapy_mongodb.MongoDBPipeline': 300,
-    'scrapyelasticsearch.scrapyelasticsearch.ElasticSearchPipeline': 400
+    'rent_crawler.pipelines.ElasticSearchAdapterPipeline': 400
 }
 
 MONGODB_URI = ''
