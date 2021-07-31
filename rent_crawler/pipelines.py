@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 import hashlib
 import json
+import logging
 
 import redis as redis
 from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
+from scrapyelasticsearch.scrapyelasticsearch import ElasticSearchPipeline
+
+logging.getLogger('elasticsearch').setLevel(logging.ERROR)
 
 
 class RentCrawlerPipeline:
@@ -13,7 +17,7 @@ class RentCrawlerPipeline:
         j = json.dumps(ItemAdapter(item).asdict(), sort_keys=True)
         m.update(j.encode('utf-8'))
         item['item_id'] = m.hexdigest()
-        return ItemAdapter(item).asdict()
+        return item
 
 
 class RedisDuplicatePipeline:
@@ -46,3 +50,9 @@ class RedisDuplicatePipeline:
             self.redis_client.set(redis_id, 'SEEN')
 
         return item
+
+
+class ElasticSearchAdapterPipeline(ElasticSearchPipeline):
+    def process_item(self, item, spider):
+        item = ItemAdapter(item).asdict()
+        return super().process_item(item, spider)
