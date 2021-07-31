@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from scrapy import Item, Field
 from scrapy.loader import ItemLoader
-from itemloaders.processors import MapCompose, TakeFirst, Join
+from itemloaders.processors import MapCompose, TakeFirst, Join, Compose
 from w3lib.html import replace_tags
 
 
@@ -13,6 +13,7 @@ def process_float_or_int(value):
 
 
 parse_float_or_int = MapCompose(lambda x: process_float_or_int(x))
+sum_numbers = Compose(lambda v: sum(v))
 strip = MapCompose(str.strip, replace_tags, lambda text: text if text != '' else None)
 join = Join(', ')
 filter_images = MapCompose(lambda media: media.get('url') if media.get('type') == 'IMAGE' else None)
@@ -39,7 +40,7 @@ class Prices(Item):
     condo = Field()
     iptu = Field()
     iptu_and_condo = Field()
-    total = Field()
+    total = Field(output_processor=sum_numbers)
 
 
 class PricesLoader(ItemLoader):

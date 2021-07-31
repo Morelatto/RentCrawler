@@ -45,7 +45,9 @@ class BaseVrZapSpider(scrapy.Spider):
             prices_loader.add_value('rent', json_price.get('price'))
             prices_loader.add_value('condo', json_price.get('monthlyCondoFee'))
             prices_loader.add_value('iptu', json_price.get('yearlyIptu'))
-            prices_loader.add_value('total', json_price.get('rentalInfo', {}).get('monthlyRentalTotalPrice'))
+            prices_loader.add_value('total', json_price.get('price'))
+            prices_loader.add_value('total', json_price.get('monthlyCondoFee'))
+            prices_loader.add_value('total', json_price.get('yearlyIptu'))
             yield prices_loader.load_item()
 
     @classmethod
