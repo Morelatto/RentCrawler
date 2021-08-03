@@ -32,7 +32,7 @@ class BaseVrZapSpider(scrapy.Spider):
         address_loader = AddressLoader()
         address_loader.add_value('street', json_address.get('street'))
         address_loader.add_value('street', json_address.get('streetNumber'))
-        address_loader.add_value('street', json_address.get('complement'))
+        address_loader.add_value('complement', json_address.get('complement'))
         address_loader.add_value('district', json_address.get('neighborhood'))
         address_loader.add_value('city', json_address.get('city'))
         address_loader.add_value('cep', json_address.get('zipCode'))

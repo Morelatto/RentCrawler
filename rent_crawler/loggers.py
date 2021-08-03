@@ -22,5 +22,6 @@ class QuietLogFormatter(LogFormatter):
             'args': {
                 'code': item['code'],
                 'item_id': item['item_id'],
+                'exception': exception
             }
         }

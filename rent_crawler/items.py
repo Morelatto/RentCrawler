@@ -24,6 +24,7 @@ format_quintoandar_image_url = MapCompose(lambda img: "https://www.quintoandar.c
 
 class Address(Item):
     street = Field(output_processor=join)
+    complement = Field()
     district = Field()
     city = Field()
     cep = Field()
