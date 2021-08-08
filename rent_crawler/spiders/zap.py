@@ -39,9 +39,6 @@ class ZapSpider(BaseVrZapSpider):
     headers = {
         'x-domain': 'www.zapimoveis.com.br'
     }
-    custom_settings = {
-        'ELASTICSEARCH_INDEX': 'rent-vrzap'
-    }
 
     def start_requests(self):
         page = self.start_page
@@ -49,3 +46,6 @@ class ZapSpider(BaseVrZapSpider):
             req_url = self.start_url.format(size=PAGE_SIZE, from_=(page - 1) * PAGE_SIZE, page=page)
             yield scrapy.Request(url=req_url, headers=self.headers)
             page += 1
+
+    def get_site_url(self):
+        return 'https://zapimoveis.com.br'

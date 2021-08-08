@@ -3,11 +3,11 @@ import json
 import scrapy
 from scrapy.loader import ItemLoader
 
-from rent_crawler.items import RentalPropertyLoader, AddressLoader, PricesLoader, DetailsLoader
+from rent_crawler.items import RentalPropertyLoader, AddressLoader, PricesLoader, DetailsLoader, TextDetails, \
+    TextDetailsLoader, QuintoAndarPrices, QuintoAndarProperty
 from rent_crawler.items import RentalProperty, Address, Prices, Details, QuintoAndarMediaDetails
 
 PAGE_SIZE = 11
-SITE_URL = 'https://www.quintoandar.com.br'
 
 
 class QuintoAndarSpider(scrapy.Spider):
@@ -26,11 +26,12 @@ class QuintoAndarSpider(scrapy.Spider):
                     "availability": "any",
                     "occupancy": "any",
                     "sorting": {{
-                        "criteria": "relevance",
+                        "criteria": "relevance_rent",
                         "order": "desc"
                     }},
                     "page_size": {page_size},
-                    "offset": {offset}
+                    "offset": {offset},
+                    "search_dropdown_value": "São Paulo, SP, Brasil"
                 }},
                 "return": [
                     "id",
@@ -54,7 +55,8 @@ class QuintoAndarSpider(scrapy.Spider):
                     "parkingSpaces",
                     "listingTags",
                     "yield",
-                    "yieldStrategy"
+                    "yieldStrategy",
+                    "neighbourhood"
                 ],
                 "business_context": "RENT"
                 }}'''
@@ -81,27 +83,29 @@ class QuintoAndarSpider(scrapy.Spider):
         json_response = response.json()
         for result in json_response['hits']['hits']:
             source = result['_source']
-            loader = RentalPropertyLoader()
+            loader = RentalPropertyLoader(item=QuintoAndarProperty())
             loader.add_value('code', result['_id'])
             loader.add_value('address', self.get_address(source))
             loader.add_value('prices', self.get_prices(source))
             loader.add_value('details', self.get_details(source))
             loader.add_value('media', self.get_media_details(source))
-            loader.add_value('url', f"{SITE_URL}/imovel/{result['_id']}")
-            loader.add_value('type', source['type'])
+            loader.add_value('text_details', self.get_text_details(source))
+            loader.add_value('url', self.get_site_url())
+            loader.add_value('url', 'imovel')
+            loader.add_value('url', result['_id'])
             yield loader.load_item()
 
     @classmethod
     def get_address(cls, json_source: dict) -> Address:
         address_loader = AddressLoader()
         address_loader.add_value('street', json_source.get('address'))
-        address_loader.add_value('district', json_source.get('regionName'))
+        address_loader.add_value('district', json_source.get('neighbourhood'))
         address_loader.add_value('city', json_source.get('city'))
         return address_loader.load_item()
 
     @classmethod
-    def get_prices(cls, json_source: dict) -> Prices:
-        prices_loader = PricesLoader()
+    def get_prices(cls, json_source: dict) -> QuintoAndarPrices:
+        prices_loader = PricesLoader(item=QuintoAndarPrices())
         prices_loader.add_value('rent', json_source.get('rent'))
         prices_loader.add_value('iptu_and_condo', json_source.get('iptuPlusCondominium'))
         prices_loader.add_value('total', json_source.get('totalCost'))
@@ -116,7 +120,17 @@ class QuintoAndarSpider(scrapy.Spider):
         return details_loader.load_item()
 
     @classmethod
+    def get_text_details(cls, json_source: dict) -> TextDetails:
+        text_details_loader = TextDetailsLoader()
+        text_details_loader.add_value('type', json_source['type'])
+        return text_details_loader.load_item()
+
+    @classmethod
     def get_media_details(cls, json_source: dict) -> QuintoAndarMediaDetails:
         media_details_loader = ItemLoader(item=QuintoAndarMediaDetails())
         media_details_loader.add_value('images', json_source.get('imageList'))
         return media_details_loader.load_item()
+
+    @classmethod
+    def get_site_url(cls):
+        return 'https://www.quintoandar.com.br'
