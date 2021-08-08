@@ -1,5 +1,4 @@
 Scrapy==2.5.0
 scrapy-mongodb==0.12.0
 redis==3.5.3
-ScrapyElasticSearch==0.9.2
-pip install git+https://github.com/jayzeng/scrapy-elasticsearch.git@refs/pull/90/head
+git+https://github.com/jayzeng/scrapy-elasticsearch.git@refs/pull/90/head
