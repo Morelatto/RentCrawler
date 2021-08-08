@@ -3,9 +3,9 @@ import json
 import scrapy
 from scrapy.loader import ItemLoader
 
-from rent_crawler.items import RentalPropertyLoader, AddressLoader, PricesLoader, DetailsLoader, TextDetails, \
-    TextDetailsLoader, QuintoAndarPrices, QuintoAndarProperty
-from rent_crawler.items import RentalProperty, Address, Prices, Details, QuintoAndarMediaDetails
+from rent_crawler.items import RentalPropertyLoader, AddressLoader, PricesLoader, DetailsLoader, TextDetailsLoader
+from rent_crawler.items import QuintoAndarProperty, Address, QuintoAndarPrices, Details, TextDetails, \
+    QuintoAndarMediaDetails
 
 PAGE_SIZE = 11
 
@@ -79,7 +79,7 @@ class QuintoAndarSpider(scrapy.Spider):
             yield scrapy.Request(url=self.start_url, method='POST', headers=self.headers, body=json_data)
             page += 1
 
-    def parse(self, response, **kwargs) -> RentalProperty:
+    def parse(self, response, **kwargs) -> QuintoAndarProperty:
         json_response = response.json()
         for result in json_response['hits']['hits']:
             source = result['_source']
