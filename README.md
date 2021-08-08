@@ -30,7 +30,6 @@ MONGODB_ADD_TIMESTAMP = True
 MONGODB_SEPARATE_COLLECTIONS = True
 
 ELASTICSEARCH_SERVERS = ['']
-ELASTICSEARCH_INDEX = 'rent-items'
 ELASTICSEARCH_UNIQ_KEY = 'code'
 ELASTICSEARCH_BUFFER_LENGTH = 250
 
@@ -60,7 +59,7 @@ ITEM_PIPELINES = {
     'rent_crawler.pipelines.RentCrawlerPipeline': 100,
     'rent_crawler.pipelines.RedisDuplicatePipeline': 200,
     'scrapy_mongodb.MongoDBPipeline': 300,
-    'scrapyelasticsearch.scrapyelasticsearch.ElasticSearchPipeline': 400
+    'rent_crawler.pipelines.ElasticSearchAdapterPipeline': 400
 }
 ```
 
