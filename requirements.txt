@@ -1,4 +1,4 @@
-Scrapy==2.5.1
+Scrapy==2.6.1
 scrapy-mongodb==0.12.0
 redis==3.5.3
 git+https://github.com/jayzeng/scrapy-elasticsearch.git@refs/pull/90/head
