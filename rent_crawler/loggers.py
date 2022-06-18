@@ -6,22 +6,28 @@ from scrapy.logformatter import LogFormatter
 
 class QuietLogFormatter(LogFormatter):
     def scraped(self, item, response, spider):
-        return {
+        log_params = {
             'level': logging.DEBUG,
-            'msg': "Scraped: New item code=%(code)s item_id=%(item_id)s",
+            'msg': "Scraped: New item code=%(code)s",
             'args': {
                 'code': item['code'],
-                'item_id': item['item_id'],
             }
         }
+        if 'item_id' in item:
+            log_params['msg'] += ' item_id=%(item_id)s'
+            log_params['args']['item_id'] = item['item_id']
+        return log_params
 
     def dropped(self, item, exception, response, spider):
-        return {
+        log_params = {
             'level': logging.WARNING,
-            'msg': "Dropped: %(exception)s code=%(code)s item_id=%(item_id)s",
+            'msg': "Dropped: %(exception)s code=%(code)s",
             'args': {
                 'code': item['code'],
-                'item_id': item['item_id'],
                 'exception': exception
             }
         }
+        if 'item_id' in item:
+            log_params['msg'] += ' item_id=%(item_id)s'
+            log_params['args']['item_id'] = item['item_id']
+        return log_params
