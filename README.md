@@ -2,7 +2,7 @@
 
 Crawlers para sites de aluguel com persistência de dados em banco não relacional e deduplicação de itens usando banco em memória. Os itens são enviados para um cluster Elasticsearch para serem analisados e visualizados no Kibana.
 
-O projeto foi desenvolvido com o objetivo de agregar as informações disponíveis em vários sites de aluguel em um único local para facilitar a busca de um novo apartamento e ter mais parâmetros de busca além dos que os sites disponibilizam.
+O projeto foi desenvolvido visando agregar as informações disponíveis em vários sites de aluguel em um único local para facilitar a busca de um novo apartamento e ter mais parâmetros de busca além dos que os sites disponibilizam.
 
 ## Sites de aluguel
 
@@ -13,7 +13,7 @@ O projeto foi desenvolvido com o objetivo de agregar as informações disponíve
 ## Requisitos
 
 - Python 3.8+
-- Scrapy 2.5.0
+- Scrapy 2.6.1
 - MongoDB
 - Redis
 - Elasticsearch
@@ -23,17 +23,17 @@ O projeto foi desenvolvido com o objetivo de agregar as informações disponíve
 * rent_crawler/settings.py
 
 ```py
-MONGODB_URI = 'mongodb://'
+MONGODB_URI = 'mongodb://localhost:27017'
 MONGODB_DATABASE = 'rent'
 MONGODB_UNIQUE_KEY = 'code'
 MONGODB_ADD_TIMESTAMP = True
 MONGODB_SEPARATE_COLLECTIONS = True
 
-ELASTICSEARCH_SERVERS = ['']
+ELASTICSEARCH_SERVERS = ['localhost']
 ELASTICSEARCH_UNIQ_KEY = 'code'
 ELASTICSEARCH_BUFFER_LENGTH = 250
 
-REDIS_HOST = ''
+REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 ```
 
