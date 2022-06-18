@@ -8,7 +8,7 @@ USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.
              'Safari/601.3.9'
 
 DOWNLOAD_DELAY = 2
-DOWNLOAD_TIMEOUT = 30
+DOWNLOAD_TIMEOUT = 16
 
 CONCURRENT_REQUESTS_PER_DOMAIN = 1
 
@@ -27,17 +27,17 @@ ITEM_PIPELINES = {
     'rent_crawler.pipelines.ElasticSearchAdapterPipeline': 400
 }
 
-MONGODB_URI = ''
+MONGODB_URI = 'mongodb://localhost:27017'
 MONGODB_DATABASE = 'rent'
 MONGODB_UNIQUE_KEY = 'code'
 MONGODB_ADD_TIMESTAMP = True
 MONGODB_SEPARATE_COLLECTIONS = True
 
-ELASTICSEARCH_SERVERS = ['']
+ELASTICSEARCH_SERVERS = ['localhost']
 ELASTICSEARCH_UNIQ_KEY = 'code'
 ELASTICSEARCH_BUFFER_LENGTH = 250
 
-REDIS_HOST = ''
+REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 
 # LOG_STDOUT = True
