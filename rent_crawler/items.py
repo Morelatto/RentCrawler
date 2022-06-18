@@ -37,6 +37,10 @@ class VRZapAddress(Address):
     location = Field(input_processor=remove_source)
 
 
+class QuintoAndarAddress(Address):
+    region = Field()
+
+
 class AddressLoader(ItemLoader):
     default_item_class = Address
     default_input_processor = strip
@@ -99,6 +103,7 @@ class TextDetailsLoader(ItemLoader):
 
 class QuintoAndarMediaDetails(Item):
     images = Field(output_processor=format_quintoandar_image_url)
+    captions = Field()
 
 
 class VRZapMediaDetails(Item):
@@ -127,6 +132,7 @@ class VRZapRentalProperty(RentalProperty):
 
 
 class QuintoAndarProperty(RentalProperty):
+    address = Field(serializer=QuintoAndarAddress)
     prices = Field(serializer=QuintoAndarPrices)
     media = Field(serializer=QuintoAndarMediaDetails)
     url = Field(output_processor=Join('/'))
