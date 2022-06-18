@@ -3,7 +3,8 @@ import json
 import scrapy
 from scrapy.loader import ItemLoader
 
-from rent_crawler.items import RentalPropertyLoader, AddressLoader, PricesLoader, DetailsLoader, TextDetailsLoader
+from rent_crawler.items import RentalPropertyLoader, AddressLoader, PricesLoader, DetailsLoader, TextDetailsLoader, \
+    QuintoAndarAddress
 from rent_crawler.items import QuintoAndarProperty, Address, QuintoAndarPrices, Details, TextDetails, \
     QuintoAndarMediaDetails
 
@@ -14,6 +15,7 @@ class QuintoAndarSpider(scrapy.Spider):
     name = 'quintoandar'
     start_url = 'https://www.quintoandar.com.br/api/yellow-pages/v2/search'
     data = '''{{
+                "business_context": "RENT",
                 "filters": {{
                     "map": {{
                         "bounds_north": -23.50560423579402,
@@ -31,7 +33,7 @@ class QuintoAndarSpider(scrapy.Spider):
                     }},
                     "page_size": {page_size},
                     "offset": {offset},
-                    "search_dropdown_value": "São Paulo, SP, Brasil"
+                    "search_dropdown_value": "Saúde, São Paulo - SP, Brasil"
                 }},
                 "return": [
                     "id",
@@ -57,8 +59,7 @@ class QuintoAndarSpider(scrapy.Spider):
                     "yield",
                     "yieldStrategy",
                     "neighbourhood"
-                ],
-                "business_context": "RENT"
+                ]
                 }}'''
     headers = {
         'Accept': 'application/pclick_sale.v0+json'
@@ -75,6 +76,7 @@ class QuintoAndarSpider(scrapy.Spider):
     def start_requests(self):
         page = self.start_page
         while page < self.start_page + self.pages_to_crawl:
+            self.logger.info('Scrapping page %d', page)
             json_data = json.dumps(json.loads(self.data.format(page_size=PAGE_SIZE, offset=(page - 1) * PAGE_SIZE)))
             yield scrapy.Request(url=self.start_url, method='POST', headers=self.headers, body=json_data)
             page += 1
@@ -97,10 +99,11 @@ class QuintoAndarSpider(scrapy.Spider):
 
     @classmethod
     def get_address(cls, json_source: dict) -> Address:
-        address_loader = AddressLoader()
+        address_loader = AddressLoader(item=QuintoAndarAddress())
         address_loader.add_value('street', json_source.get('address'))
         address_loader.add_value('district', json_source.get('neighbourhood'))
         address_loader.add_value('city', json_source.get('city'))
+        address_loader.add_value('region', json_source.get('regionName'))
         return address_loader.load_item()
 
     @classmethod
@@ -129,6 +132,7 @@ class QuintoAndarSpider(scrapy.Spider):
     def get_media_details(cls, json_source: dict) -> QuintoAndarMediaDetails:
         media_details_loader = ItemLoader(item=QuintoAndarMediaDetails())
         media_details_loader.add_value('images', json_source.get('imageList'))
+        media_details_loader.add_value('captions', json_source.get('imageCaptionList'))
         return media_details_loader.load_item()
 
     @classmethod
