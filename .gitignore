@@ -5,3 +5,7 @@ build/
 *.egg-info/
 __pycache__/
 *.sql
+
+esdata/
+mongodb/
+redis/

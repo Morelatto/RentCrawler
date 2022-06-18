@@ -1,0 +1,91 @@
+version: '3.7'
+
+services:
+  es_rent:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.2.2
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      node.name: "rc-es-node"
+      discovery.type: "single-node"
+      cluster.name: "rc-es-data-cluster"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      bootstrap.memory_lock: "true"
+      xpack.security.enabled: "false"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65535
+        hard: 65535
+    volumes:
+      - ./esdata:/usr/share/elasticsearch/data
+    networks:
+      - elasticnet
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.2.2
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://es_rent:9200
+    depends_on:
+      - es_rent
+    networks:
+      - elasticnet
+
+  mongodb_rent:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: rent
+#      MONGO_INITDB_ROOT_USERNAME: root
+#      MONGO_INITDB_ROOT_PASSWORD: pass
+    volumes:
+      - ./mongodb:/data/db
+#      - ./mongo-config:/data/configdb
+    networks:
+      - mongonet
+
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - "8082:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb_rent
+#      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+#      ME_CONFIG_MONGODB_ADMINPASSWORD: pass
+    depends_on:
+      - mongodb_rent
+    networks:
+      - mongonet
+
+  redis_rent:
+    image: redis:latest
+    command: redis-server --appendonly yes
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./redis:/data
+    networks:
+      - redisnet
+
+networks:
+  elasticnet:
+    driver: bridge
+  mongonet:
+    driver: bridge
+  redisnet:
+    driver: bridge
+
+volumes:
+  esdata:
+    driver: local
+  mongodb:
+    driver: local
+  redis:
+    driver: local
+
