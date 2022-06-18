@@ -13,10 +13,11 @@ logging.getLogger('elasticsearch').setLevel(logging.ERROR)
 
 class RentCrawlerPipeline:
     def process_item(self, item, spider):
-        m = hashlib.md5()
-        j = json.dumps(ItemAdapter(item).asdict(), sort_keys=True)
-        m.update(j.encode('utf-8'))
-        item['item_id'] = m.hexdigest()
+        item_hash = hashlib.sha1()
+        item_dict = ItemAdapter(item).asdict()
+        item_json = json.dumps(item_dict, sort_keys=True)
+        item_hash.update(item_json.encode('utf-8'))
+        item['item_id'] = item_hash.hexdigest()
         return item
 
 
