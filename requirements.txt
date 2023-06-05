@@ -1,4 +1,4 @@
-Scrapy==2.6.1
-scrapy-mongodb==0.12.0
-redis==4.3.3
-git+https://github.com/jayzeng/scrapy-elasticsearch.git
+Scrapy==2.9.0
+scrapy-poet==0.13.0
+pymongo==4.3.3
+redis==4.5.5
