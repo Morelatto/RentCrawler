@@ -1,12 +1,8 @@
-import hashlib
-
 import scrapy
 
 from rent_crawler.pages import QuintoAndarListPage, QuintoAndarPropertyPage
 
 PAGE_SIZE = 11
-
-sha1 = hashlib.sha1()
 
 
 class QuintoAndarSpider(scrapy.Spider):
@@ -47,8 +43,7 @@ class QuintoAndarSpider(scrapy.Spider):
 
     def parse(self, response: scrapy.http.Response, page: QuintoAndarListPage, **kwargs):
         self.logger.info('Scraping page %d/%d', kwargs['page_number'], kwargs['total_pages'])
-        for i, d in enumerate(zip(page.property_urls, page.properties)):
-            url, hit = d
+        for i, (url, hit) in enumerate(zip(page.property_urls, page.properties), start=1):
             yield response.follow(
                 url=url,
                 callback=self.parse_property_page,

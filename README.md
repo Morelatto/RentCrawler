@@ -68,7 +68,7 @@ poetry run scrapy crawl <spider_name> -a <spider_parameter>=<spider_parameter_va
 poetry install --with=dev
 ```
 
-### Salvar para arquivo JSON
+### Salvar em JSON
 
 ```
 poetry run scrapy crawl <spider_name> -o output.json
