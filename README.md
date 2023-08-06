@@ -16,26 +16,6 @@ O projeto foi desenvolvido visando agregar as informações disponíveis em vár
 - Scrapy 2.6.1
 - MongoDB
 - Redis
-- Elasticsearch
-
-## Configurações
-
-* rent_crawler/settings.py
-
-```py
-MONGODB_URI = 'mongodb://localhost:27017'
-MONGODB_DATABASE = 'rent'
-MONGODB_UNIQUE_KEY = 'code'
-MONGODB_ADD_TIMESTAMP = True
-MONGODB_SEPARATE_COLLECTIONS = True
-
-ELASTICSEARCH_SERVERS = ['localhost']
-ELASTICSEARCH_UNIQ_KEY = 'code'
-ELASTICSEARCH_BUFFER_LENGTH = 250
-
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-```
 
 ## Parâmetros
 
@@ -50,30 +30,48 @@ Mais informações em:
 - https://docs.scrapy.org/en/latest/topics/developer-tools.html#the-network-tool
 - https://docs.scrapy.org/en/latest/topics/dynamic-content.html
 
-## Rodar local
+## Docker
 
-Para rodar local e salvar os itens para um arquivo json sem enviar para nenhum banco ou cluster Elasticsearch, é preciso comentar a configuração dos pipelines no arquivo de configurações:
+Para subir uma instância local MongoDB e um Redis e salvar o resultado do crawler, execute na pasta do projeto:
 
-```py
-ITEM_PIPELINES = {
-    'rent_crawler.pipelines.RentCrawlerPipeline': 100,
-    'rent_crawler.pipelines.RedisDuplicatePipeline': 200,
-    'scrapy_mongodb.MongoDBPipeline': 300,
-    'rent_crawler.pipelines.ElasticSearchAdapterPipeline': 400
-}
+```sh
+cat `
+MONGO_INITDB_DATABASE: rent
+MONGO_INITDB_ROOT_USERNAME: root
+MONGO_INITDB_ROOT_PASSWORD: pass
+
+ME_CONFIG_MONGODB_SERVER: mongodb
+ME_CONFIG_MONGODB_ADMINUSERNAME: root
+ME_CONFIG_MONGODB_ADMINPASSWORD: pass
+
+REDIS_PASSWORD: root
+` > .env
+
+docker-compose up -d
 ```
 
-Instalar as dependências do projeto:
+Após essa configuração os seguintes endpoints estarão disponíveis:
+
+- MongoDB: `mongodb://root:pass@localhost:27017`
+- Redis:  `redis://root:root@localhost:9001/0`
+- Mongo Express: `http://localhost:8082`
+
+## Rodar
 
 ```
-pip install -r requirements.txt
+poetry run scrapy crawl <spider_name> -a <spider_parameter>=<spider_parameter_value>
 ```
 
-
-Rodar o crawler:
+### Depêndencias
 
 ```
-scrapy crawl vivareal -a start_page=1 -a pages_to_crawl=2 -o vivareal.json
+poetry install --with=dev
+```
+
+### Salvar para arquivo JSON
+
+```
+poetry run scrapy crawl <spider_name> -o output.json
 ```
 
 # License
