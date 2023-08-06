@@ -1,94 +1,12 @@
 # -*- coding: utf-8 -*-
 import datetime
-import hashlib
-import json
 import logging
-
-import redis
-from itemadapter import ItemAdapter
-from scrapy.exceptions import DropItem
 
 from pymongo import errors
 from pymongo.mongo_client import MongoClient
 from pymongo.read_preferences import ReadPreference
 
 from scrapy.exporters import BaseItemExporter
-
-ITEM_ID_KEY = "item_id"
-
-
-class RentCrawlerPipeline:
-    def process_item(self, item, spider):
-        item_hash = hashlib.sha1()
-        item_dict = ItemAdapter(item).asdict()
-        item_json = json.dumps(item_dict, sort_keys=True)
-        item_hash.update(item_json.encode("utf-8"))
-        item[ITEM_ID_KEY] = item_hash.hexdigest()
-        return item
-
-
-redis_key_prefix = {
-    "vivareal": "VR",
-    "zap": "ZAP",
-    "quintoandar": "QUINTO",
-}
-
-
-class RedisDuplicatePipeline:
-    def __init__(self, redis_host, redis_port, redis_db_number):
-        if redis_host is not None:
-            self.redis_client = redis.Redis(host=redis_host, port=redis_port, db=redis_db_number)
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        settings = crawler.settings
-        redis_host = settings.get("REDIS_HOST")
-        redis_port = settings.get("REDIS_PORT", default=6379)
-        redis_db_number = settings.get("REDIS_DB_NUMBER", default=0)
-        return cls(redis_host, redis_port, redis_db_number)
-
-    def process_item(self, item, spider):
-        if self.redis_client is None:
-            return item
-
-        if ITEM_ID_KEY in item:
-            redis_id = f"{redis_key_prefix[spider.name]}:{item[ITEM_ID_KEY]}"
-            existing_id = self.redis_client.get(redis_id)
-            if existing_id is not None:
-                raise DropItem("Duplicate item found")
-
-        return item
-
-
-class RedisPipeline(object):
-    def __init__(self, redis_host, redis_port):
-        if redis_host is not None:
-            self.redis_client = redis.Redis(host=redis_host, port=redis_port)
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        settings = crawler.settings
-        redis_host = settings.get("REDIS_HOST")
-        redis_port = settings.get("REDIS_PORT", default=6379)
-        return cls(redis_host, redis_port)
-
-    def process_item(self, item, spider):
-        if ITEM_ID_KEY in item:
-            redis_id = f"{redis_key_prefix[spider.name]}:{item[ITEM_ID_KEY]}"
-            self.redis_client.set(redis_id, "SEEN")
-        return item
-
-
-def not_set(string):
-    """Check if a string is None or ''.
-
-    :returns: bool - True if the string is empty
-    """
-    if string is None:
-        return True
-    elif string == "":
-        return True
-    return False
 
 
 class MongoDBPipeline(BaseItemExporter):
@@ -190,19 +108,6 @@ class MongoDBPipeline(BaseItemExporter):
 
     def configure(self):
         """Configure the MongoDB connection."""
-        # Handle deprecated configuration
-        if not not_set(self.settings["MONGODB_HOST"]):
-            self.logger.warning("DeprecationWarning: MONGODB_HOST is deprecated")
-            mongodb_host = self.settings["MONGODB_HOST"]
-
-            if not not_set(self.settings["MONGODB_PORT"]):
-                self.logger.warning("DeprecationWarning: MONGODB_PORT is deprecated")
-                self.config["uri"] = "mongodb://{0}:{1:i}".format(
-                    mongodb_host, self.settings["MONGODB_PORT"]
-                )
-            else:
-                self.config["uri"] = "mongodb://{0}:27017".format(mongodb_host)
-
         # Set all regular options
         options = [
             ("uri", "MONGODB_URI"),
@@ -219,7 +124,7 @@ class MongoDBPipeline(BaseItemExporter):
         ]
 
         for key, setting in options:
-            if not not_set(self.settings[setting]):
+            if self.settings[setting]:
                 self.config[key] = self.settings[setting]
 
         # Check for illegal configuration
@@ -240,9 +145,30 @@ class MongoDBPipeline(BaseItemExporter):
         :param spider: The spider running the queries
         :returns: Item object
         """
-        item = dict(self._get_serialized_fields(item))
+
+        try:
+            for k, v in item.items():
+                if v is None or v == "":
+                    spider.logger.warning(f'Null field: {k} in item: {item}')
+        except Exception as ex:
+            # log or print the problematic item here, e.g.
+            spider.logger.warning(f"Error {ex}")
+
+        try:
+            item = dict(self._get_serialized_fields(item))
+            # continue with your pipeline
+        except TypeError:
+            # log or print the problematic item here, e.g.
+            spider.logger.warning(f"Failed to serialize item: {item}")
 
         item = {k: v for k, v in item.items() if v is not None and v != ""}
+
+        expanded_item = {}
+        for k, v in item.items():
+            if v is not None and v != "":
+                expanded_item[k] = v
+            else:
+                spider.logger.warning(f'Null field: {k} in item: {item}')
 
         if self.config["buffer"]:
             self.current_item += 1
