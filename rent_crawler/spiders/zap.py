@@ -46,6 +46,3 @@ class ZapSpider(BaseVrZapSpider):
             req_url = self.start_url.format(size=PAGE_SIZE, from_=(page - 1) * PAGE_SIZE, page=page)
             yield scrapy.Request(url=req_url, headers=self.headers)
             page += 1
-
-    def get_site_url(self):
-        return 'https://zapimoveis.com.br'
