@@ -7,17 +7,16 @@ from rent_crawler.items import VRZapRentalProperty, VRZapAddress, VRZapPrices, V
 
 
 class BaseVrZapSpider(scrapy.Spider):
-    custom_settings = {
-        'ELASTICSEARCH_INDEX': 'rent-vrzap'
-    }
-
     def __init__(self, start_page=1, pages_to_crawl=1, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start_page = int(start_page)
         self.pages_to_crawl = int(pages_to_crawl)
 
     def parse(self, response, **kwargs) -> VRZapRentalProperty:
+        self.logger.info('Scraping page %d/%d', kwargs['page_number'], kwargs['total_pages'])
+
         json_response = response.json()
+        self.logger.info(json_response['search'])
         for result in json_response['search']['result']['listings']:
             listing = result['listing']
             loader = RentalPropertyLoader(item=VRZapRentalProperty())
@@ -27,9 +26,10 @@ class BaseVrZapSpider(scrapy.Spider):
             loader.add_value('details', self.get_details(listing))
             loader.add_value('text_details', self.get_text_details(listing))
             loader.add_value('media', self.get_media_details(result['medias']))
-            loader.add_value('url', self.get_site_url())
             loader.add_value('url', result['link']['href'])
-            yield loader.load_item()
+            item = loader.load_item()
+            self.logger.info(item)
+            yield item
 
     @classmethod
     def get_address(cls, json_address: dict) -> VRZapAddress:
@@ -60,12 +60,12 @@ class BaseVrZapSpider(scrapy.Spider):
     @classmethod
     def get_details(cls, json_listing: dict) -> VRZapDetails:
         details_loader = DetailsLoader(item=VRZapDetails())
-        details_loader.add_value('size', json_listing.get('totalAreas'))
-        details_loader.add_value('size', json_listing.get('usableAreas'))
-        details_loader.add_value('rooms', json_listing.get('bedrooms'))
+        details_loader.add_value('area', json_listing.get('totalAreas'))
+        details_loader.add_value('area', json_listing.get('usableAreas'))
+        details_loader.add_value('bedrooms', json_listing.get('bedrooms'))
         details_loader.add_value('suites', json_listing.get('suites'))
         details_loader.add_value('bathrooms', json_listing.get('bathrooms'))
-        details_loader.add_value('garages', json_listing.get('parkingSpaces'))
+        details_loader.add_value('parking', json_listing.get('parkingSpaces'))
         return details_loader.load_item()
 
     @classmethod
@@ -84,6 +84,3 @@ class BaseVrZapSpider(scrapy.Spider):
         media_details_loader.add_value('images', json_medias)
         media_details_loader.add_value('video', json_medias)
         return media_details_loader.load_item()
-
-    def get_site_url(self):
-        raise NotImplementedError()
