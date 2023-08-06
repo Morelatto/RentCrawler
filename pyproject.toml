@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "rentcrawler"
+version = "0.1.0"
+description = ""
+authors = ["Morelatto <morelatto@pm.me>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+scrapy = "2.9.0"
+scrapy-poet = "0.13.0"
+scrapy-redis = "^0.7.3"
+scrapy-fake-useragent = "^1.4.4"
+
+[tool.poetry.group.dev.dependencies]
+pymongo = "^4.4.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
