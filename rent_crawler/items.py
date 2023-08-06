@@ -79,7 +79,7 @@ class Details(Item):
 
 
 class VRZapDetails(Details):
-    size = Field(input_processor=bigger_than_zero)
+    area = Field(input_processor=bigger_than_zero)
     suites = Field()
 
 
