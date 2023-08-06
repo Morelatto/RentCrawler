@@ -1,9 +1,10 @@
+import hashlib
+import json
 from dataclasses import dataclass
 
 from web_poet import WebPage
 
-from rent_crawler.items import QuintoAndarProperty, QuintoAndarDetailsLoader, QuintoAndarPricesLoader, \
-    QuintoAndarTextDetails
+from rent_crawler.items import QuintoAndarProperty, QuintoAndarDetailsLoader, QuintoAndarPricesLoader, QuintoAndarTextDetails
 from rent_crawler.providers import BodyJson
 
 
@@ -40,11 +41,14 @@ class QuintoAndarPropertyHit:
 
     @property
     def media(self) -> dict:
-        images = ["https://www.quintoandar.com.br/img/med/" + img for img in self.source.get('imageList')]
+        images = ["/img/med/" + img for img in self.source.get('imageList')]
         return dict(zip(self.source.get('imageCaptionList'), images))
 
     def to_item(self):
-        pass
+        address_hash = tuple(self.address.items())
+        prices_hash = tuple(self.prices.items())
+        serialized_data = json.dumps(address_hash + prices_hash).encode('utf-8')
+        return {'id': hashlib.md5(serialized_data).hexdigest()}
 
 
 class QuintoAndarListPage(WebPage):
@@ -53,12 +57,16 @@ class QuintoAndarListPage(WebPage):
 
     @property
     def properties(self):
-        return [QuintoAndarPropertyHit(id=result['_id'], source=result['_source']) for result in
-                self.data['hits']['hits']]
+        for result in self.data['hits']['hits']:
+            yield QuintoAndarPropertyHit(
+                id=result['_id'],
+                source=result['_source'],
+                # url=result.url
+            )
 
     @property
     def property_urls(self):
-        return ["https://www.quintoandar.com.br/imovel/" + property.id for property in self.properties]
+        return ["/imovel/" + property.id for property in self.properties]
 
     def to_item(self):
         for property in self.properties:
@@ -68,7 +76,7 @@ class QuintoAndarListPage(WebPage):
                 prices=property.prices,
                 details=property.details,
                 media=property.media,
-                url=f"https://www.quintoandar.com.br/imovel/{property.id}"
+                url=f"/imovel/{property.id}"
             )
             yield item
 
@@ -114,6 +122,7 @@ class QuintoAndarPropertyPage(WebPage):
             loader.add_value('furniture', main_info[6])
             loader.add_value('subway', main_info[7])
             return loader.load_item()
+        return ''
 
     @property
     def description(self):
@@ -150,12 +159,12 @@ class QuintoAndarPropertyPage(WebPage):
 
     @property
     def publication_date(self):
-        return self.css('small[data-testid="publication_date"]::text').get()
+        return self.css('small[data-testid="publication_date"]::text').get('')
 
     def to_item(self):
         item = QuintoAndarProperty(
             code=self.url.split('/')[4],
-            # address=self.address,
+            address=self.address,
             prices=self.prices,
             details=self.details,
             text_details=self.text_details,
