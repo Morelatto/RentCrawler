@@ -4,7 +4,7 @@ import logging
 from scrapy.logformatter import LogFormatter
 
 
-class QuietLogFormatter(LogFormatter):
+class SpiderLogFormatter(LogFormatter):
     def scraped(self, item, response, spider):
         log_params = {
             'level': logging.DEBUG,
