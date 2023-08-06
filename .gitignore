@@ -5,9 +5,11 @@ build/
 *.egg-info/
 __pycache__/
 *.sql
+*.json
 
 esdata/
 mongodb/
 redis/
+results/
 
-*.json
+.env
