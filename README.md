@@ -13,7 +13,7 @@ O projeto foi desenvolvido visando agregar as informações disponíveis em vár
 ## Requisitos
 
 - Python 3.8+
-- Scrapy 2.6.1
+- Poetry
 - MongoDB
 - Redis
 
@@ -62,7 +62,7 @@ Após essa configuração os seguintes endpoints estarão disponíveis:
 poetry run scrapy crawl <spider_name> -a <spider_parameter>=<spider_parameter_value>
 ```
 
-### Depêndencias
+### Dependências
 
 ```
 poetry install --with=dev
