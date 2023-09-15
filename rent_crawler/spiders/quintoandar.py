@@ -12,19 +12,19 @@ class QuintoAndarSpider(scrapy.Spider):
         'Accept': 'application/pclick_sale.v0+json'
     }
 
-    def __init__(self, start_page=1, pages_to_crawl=1, *args, **kwargs):
+    def __init__(self, start=1, pages=1, *args, **kwargs):
         """
         Initialize the crawler with the given parameters.
 
         Args:
-            start_page (int): The starting page number.
-            pages_to_crawl (int): The number of pages to crawl.
+            start (int): The starting page number.
+            pages (int): The number of pages to crawl.
             *args: Additional positional arguments.
             **kwargs: Additional keyword arguments.
         """
         super().__init__(*args, **kwargs)
-        self.start_page = int(start_page)
-        self.pages_to_crawl = int(pages_to_crawl)
+        self.start_page = int(start)
+        self.pages_to_crawl = int(pages)
 
     def start_requests(self):
         self.logger.info('Starting crawl of %d pages', self.pages_to_crawl)
