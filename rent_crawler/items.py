@@ -29,7 +29,8 @@ sum_numbers = Compose(lambda v: sum(v))
 strip = MapCompose(str.strip, replace_tags, lambda text: text if text != '' else None)
 filter_images = MapCompose(lambda media: media.get('url') if media.get('type') == 'IMAGE' else None)
 filter_videos = MapCompose(lambda media: media.get('url') if media.get('type') == 'VIDEO' else None)
-format_vrzap_image_url = MapCompose(lambda img: img.format(width=870, height=653, action='fit-in'))
+format_vrzap_image_url = MapCompose(
+    lambda img: img.format(width=870, height=653, action='fit-in', description='{description}'))
 format_quintoandar_image_url = MapCompose(lambda img: "https://www.quintoandar.com.br/img/med/" + img)
 remove_source = MapCompose(lambda location: location if location.pop('source', None) else location)
 bigger_than_zero = MapCompose(parse_float_or_int, lambda v: v if v > 0 else None)
@@ -41,35 +42,6 @@ class Address(Item):
     city = Field()
 
 
-class VRZapAddress(Address):
-    complement = Field()
-    cep = Field()
-    zone = Field()
-    location = Field(input_processor=remove_source)
-
-
-class AddressLoader(ItemLoader):
-    default_item_class = Address
-    default_input_processor = strip
-    default_output_processor = TakeFirst()
-
-
-class Prices(Item):
-    rent = Field()
-    total = Field(output_processor=sum_numbers)
-
-
-class VRZapPrices(Prices):
-    condo = Field()
-    iptu = Field()
-
-
-class PricesLoader(ItemLoader):
-    default_item_class = Prices
-    default_input_processor = parse_float_or_int
-    default_output_processor = TakeFirst()
-
-
 class Details(Item):
     type = Field()
     area = Field()
@@ -78,36 +50,9 @@ class Details(Item):
     parking = Field()
 
 
-class VRZapDetails(Details):
-    area = Field(input_processor=bigger_than_zero)
-    suites = Field()
-
-
-class DetailsLoader(ItemLoader):
-    default_item_class = Details
-    default_input_processor = parse_float_or_int
-    default_output_processor = TakeFirst()
-
-
-class TextDetails(Item):
-    type = Field()
-
-
-class VRZapTextDetails(TextDetails):
-    description = Field(input_processor=strip)
-    characteristics = Field(output_processor=Identity())
-    title = Field()
-    contact = Field(output_processor=Identity())
-
-
-class TextDetailsLoader(ItemLoader):
-    default_item_class = TextDetails
-    default_output_processor = TakeFirst()
-
-
-class VRZapMediaDetails(Item):
-    images = Field(input_processor=filter_images, output_processor=format_vrzap_image_url)
-    video = Field(input_processor=filter_videos)
+class Prices(Item):
+    rent = Field()
+    total = Field(output_processor=sum_numbers)
 
 
 class RentalProperty(Item):
@@ -120,9 +65,74 @@ class RentalProperty(Item):
     item_id = Field()
 
 
+class TextDetails(Item):
+    type = Field()
+
+
+class AddressLoader(ItemLoader):
+    default_item_class = Address
+    default_input_processor = strip
+    default_output_processor = TakeFirst()
+
+
+class DetailsLoader(ItemLoader):
+    default_item_class = Details
+    default_input_processor = parse_float_or_int
+    default_output_processor = TakeFirst()
+
+
+class PricesLoader(ItemLoader):
+    default_item_class = Prices
+    default_input_processor = parse_float_or_int
+    default_output_processor = TakeFirst()
+
+
 class RentalPropertyLoader(ItemLoader):
     default_item_class = RentalProperty
     default_output_processor = TakeFirst()
+
+
+class TextDetailsLoader(ItemLoader):
+    default_item_class = TextDetails
+    default_output_processor = TakeFirst()
+
+
+class VRZapAddress(Address):
+    complement = Field()
+    cep = Field()
+    zone = Field()
+    location = Field(input_processor=remove_source)
+
+
+class VRZapPrices(Prices):
+    condominium = Field()
+    iptu = Field()
+
+
+class VRZapDetails(Details):
+    area = Field(input_processor=bigger_than_zero)
+    suites = Field()
+
+
+class VRZapTextDetails(TextDetails):
+    description = Field(input_processor=strip)
+    characteristics = Field(output_processor=Identity())
+    title = Field()
+    contact = Field(output_processor=Identity())
+
+
+class VRZapMediaDetails(Item):
+    images = Field(input_processor=filter_images, output_processor=format_vrzap_image_url)
+    video = Field(input_processor=filter_videos)
+
+
+class VRZapProperty(RentalProperty):
+    address = Field(serializer=VRZapAddress)
+    prices = Field(serializer=VRZapPrices)
+    details = Field(serializer=VRZapDetails)
+    text_details = Field(serializer=VRZapTextDetails)
+    media = Field(serializer=VRZapMediaDetails)
+    url = Field(output_processor=Join(''))
 
 
 class QuintoAndarAddress(Address):
@@ -176,12 +186,3 @@ class QuintoAndarProperty(RentalProperty):
     text_details = Field(serializer=QuintoAndarTextDetails)
     url = Field()
     publication_date = Field()
-
-
-class VRZapRentalProperty(RentalProperty):
-    address = Field(serializer=VRZapAddress)
-    prices = Field(serializer=VRZapPrices)
-    details = Field(serializer=VRZapDetails)
-    text_details = Field(serializer=VRZapTextDetails)
-    media = Field(serializer=VRZapMediaDetails)
-    url = Field(output_processor=Join(''))
