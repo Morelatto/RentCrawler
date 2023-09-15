@@ -1,8 +1,8 @@
 # RentCrawler
 
-Crawlers para sites de aluguel com persistência de dados em banco não relacional e deduplicação de itens usando banco em memória. Os itens são enviados para um cluster Elasticsearch para serem analisados e visualizados no Kibana.
+Crawlers para sites de aluguel com persistência de dados em banco não relacional e deduplicação de itens usando banco em memória. 
 
-O projeto foi desenvolvido visando agregar as informações disponíveis em vários sites de aluguel em um único local para facilitar a busca de um novo apartamento e ter mais parâmetros de busca além dos que os sites disponibilizam.
+O projeto visa agregar as informações disponíveis em sites de aluguel em um único local para facilitar a busca de um novo apartamento e ter mais parâmetros de busca além dos que os sites disponibilizam.
 
 ## Sites de aluguel
 
@@ -19,10 +19,10 @@ O projeto foi desenvolvido visando agregar as informações disponíveis em vár
 
 ## Parâmetros
 
-- start_page
-  - página inicial que o crawler vai realizar a extração
-- pages_to_crawl
-  - quantidade de páginas que o crawler deverá extrair 
+- **Start Page**
+  - Número da página que a extração do crawler deve partir
+- **Total Pages**
+  - Quantidade máxima de páginas processadas pelo `start_requests` do crawler 
 
 Os crawlers usam as urls internas de cada site para extrair os dados ao invés de acessar a página de busca. Atualmente as urls estão apontando para a cidade de **São Paulo**, para atualizar o local é preciso descobrir essa url interna ou o payload de dados enviado na requisição de cada site para a cidade desejada e atualizar a variável _start_url_ ou o payload com esse valor. 
 
