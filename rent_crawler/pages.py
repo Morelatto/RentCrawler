@@ -4,7 +4,8 @@ from dataclasses import dataclass
 
 from web_poet import WebPage
 
-from rent_crawler.items import QuintoAndarProperty, QuintoAndarDetailsLoader, QuintoAndarPricesLoader, QuintoAndarTextDetails
+from rent_crawler.items import QuintoAndarProperty, QuintoAndarDetailsLoader, QuintoAndarPricesLoader, \
+    QuintoAndarTextDetails, VRZapProperty
 from rent_crawler.providers import BodyJson
 
 
@@ -173,3 +174,103 @@ class QuintoAndarPropertyPage(WebPage):
             publication_date=self.publication_date
         )
         return item
+
+
+@dataclass
+class VRZapPropertyHit:
+    listing: dict
+    medias: [str]
+    url: str
+
+    @property
+    def id(self) -> str:
+        return self.listing['id']
+
+    @property
+    def address(self) -> dict:
+        address = self.listing.get('address')
+        return {
+            'street': [address.get('street'), address.get('streetNumber')],
+            'district': address.get('neighbourhood'),
+            'city': address.get('city'),
+            'complement': address.get('complement'),
+            'cep': address.get('zipCode'),
+            'zone': address.get('zone'),
+            'location': address.get('point')
+        }
+
+    @property
+    def prices(self) -> dict:
+        prices = self.listing['pricingInfos']
+        for price in prices:
+            if price.get('businessType') == 'RENTAL':
+                return {
+                    'rent': price.get('price'),
+                    'condominium': price.get('monthlyCondoFee'),
+                    'iptu': price.get('yearlyIptu'),
+                    'total': [price.get('price'), price.get('monthlyCondoFee'), price.get('yearlyIptu')]
+                }
+
+    @property
+    def details(self) -> dict:
+        return {
+            'area': self.listing.get('totalAreas') or self.listing.get('usableAreas'),
+            'bedrooms': self.listing.get('bedrooms'),
+            'suites': self.listing.get('suites'),
+            'bathrooms': self.listing.get('bathrooms'),
+            'parking': self.listing.get('parkingSpaces')
+        }
+
+    @property
+    def text_details(self) -> dict:
+        return {
+            'description': self.listing.get('description'),
+            'characteristics': self.listing.get('amenities'),
+            'title': self.listing.get('title'),
+            'contact': self.listing.get('advertiserContact').get('phones'),
+            'type': self.listing.get('unitTypes')
+        }
+
+    @property
+    def media(self) -> dict:
+        return {
+            'images': self.medias,
+            'video': self.medias
+        }
+
+    def to_item(self):
+        address_hash = tuple(self.address.items())
+        prices_hash = tuple(self.prices.items())
+        serialized_data = json.dumps(address_hash + prices_hash).encode('utf-8')
+        return {'id': hashlib.md5(serialized_data).hexdigest()}
+
+
+class VRZapListPage(WebPage):
+    def __init__(self, data: BodyJson):
+        self.data = data
+
+    @property
+    def properties(self):
+        for result in self.data['search']['result']['listings']:
+            yield VRZapPropertyHit(
+                listing=result['listing'],
+                medias=result['medias'],
+                url=result['link']['href']
+            )
+
+    @property
+    def property_urls(self):
+        return [property.url for property in self.properties]
+
+    def to_item(self):
+        for property in self.properties:
+            item = VRZapProperty(
+                code=property.id,
+                address=property.address,
+                prices=property.prices,
+                details=property.details,
+                text_details=property.text_details,
+                media=property.media,
+                url=property.url
+            )
+            yield item
