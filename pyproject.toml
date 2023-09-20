@@ -11,6 +11,7 @@ scrapy = "2.9.0"
 scrapy-poet = "0.13.0"
 scrapy-redis = "^0.7.3"
 scrapy-fake-useragent = "^1.4.4"
+pytz = "^2023.3.post1"
 
 [tool.poetry.group.dev.dependencies]
 pymongo = "^4.4.1"
