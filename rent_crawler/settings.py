@@ -27,6 +27,10 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy_poet.InjectionMiddleware': 543,
 }
 
+SPIDER_MIDDLEWARES = {
+    'rent_crawler.middlewares.RedisKeySpiderMiddleware': 600,
+}
+
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 "
     "Safari/601.3.9"
@@ -38,16 +42,7 @@ USER_AGENT = (
 #     "scrapy_fake_useragent.providers.FixedUserAgentProvider",
 # ]
 
-# Use Scrapy-Redis's scheduler and dupefilter
-SCHEDULER = "scrapy_redis.scheduler.Scheduler"
-DUPEFILTER_CLASS = "rent_crawler.dupefilter.RedisDupeFilter"
 DUPEFILTER_DEBUG = True
-
-# Don't cleanup Redis queues, allows pause/resume crawls
-SCHEDULER_PERSIST = True
-
-# Schedule requests using a priority queue (FIFO by default)
-SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.SpiderPriorityQueue'
 
 ITEM_PIPELINES = {
     "rent_crawler.pipelines.MongoDBPipeline": 100
