@@ -5,9 +5,10 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import pytz
+from web_poet import WebPage
+
 from rent_crawler.items import QuintoAndarProperty, QuintoAndarTextDetails, VRZapProperty
 from rent_crawler.providers import BodyJson
-from web_poet import WebPage
 
 
 @dataclass

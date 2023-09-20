@@ -1,8 +1,9 @@
 import logging
 
-from rent_crawler.items import QuintoAndarProperty
 from scrapy import Request
 from scrapy_redis import get_redis_from_settings
+
+from rent_crawler.items import QuintoAndarProperty
 
 logger = logging.getLogger(__name__)
 

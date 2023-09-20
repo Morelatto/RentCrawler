@@ -1,6 +1,6 @@
 import scrapy
 
-from pages import QuintoAndarListPage, QuintoAndarPropertyPage
+from rent_crawler.pages import QuintoAndarListPage, QuintoAndarPropertyPage
 
 PAGE_SIZE = 11
 
