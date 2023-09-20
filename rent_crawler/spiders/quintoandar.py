@@ -1,6 +1,6 @@
 import scrapy
 
-from rent_crawler.pages import QuintoAndarListPage, QuintoAndarPropertyPage
+from pages import QuintoAndarListPage, QuintoAndarPropertyPage
 
 PAGE_SIZE = 11
 
@@ -37,7 +37,6 @@ class QuintoAndarSpider(scrapy.Spider):
                 method='POST',
                 headers=self.headers,
                 body=data,
-                dont_filter=True,
                 cb_kwargs=dict(page_number=page, total_pages=self.pages_to_crawl)
             )
 
@@ -113,4 +112,4 @@ QUINTO_ANDAR_DATA = '''{{
                     "neighbourhood",
                     "categories"
                 ]
-                }}'''
+            }}'''

@@ -24,7 +24,6 @@ class VivaRealSpider(BaseVrZapSpider):
             yield scrapy.Request(
                 url=f'{self.start_url}?{urlencode(VR_DATA)}',
                 headers=self.headers,
-                dont_filter=True,
                 cb_kwargs=dict(page_number=page, total_pages=self.pages_to_crawl)
             )
 
