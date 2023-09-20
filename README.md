@@ -1,6 +1,6 @@
 # RentCrawler
 
-Crawlers para sites de aluguel com persistência de dados em banco não relacional e deduplicação de itens usando banco em memória. 
+Crawlers para sites de aluguel com persistência em banco de dados não relacional e deduplicação de itens usando banco em memória. 
 
 O projeto visa agregar as informações disponíveis em sites de aluguel em um único local para facilitar a busca de um novo apartamento e ter mais parâmetros de busca além dos que os sites disponibilizam.
 
