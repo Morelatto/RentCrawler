@@ -91,6 +91,8 @@ class QuintoAndarPropertyPage(WebPage):
             'street': address_data.get('street'),
             'neighbourhood': address_data.get('neighborhood'),
             'city': address_data.get('city'),
+            'state': address_data.get('stateName'),
+            'country': address_data.get('countryName'),
             'cep': address_data.get('zipCode'),
             'lat': address_data.get('lat'),
             'lng': address_data.get('lng'),
@@ -106,12 +108,14 @@ class QuintoAndarPropertyPage(WebPage):
             'insurance': data.get('homeProtection'),
             'service_fee': data.get('tenantServiceFee'),
             'total': data.get('totalCost'),
+            'sale_price': data.get('salePrice'),
         }
 
     @property
     def details(self):
         data = self.json_data
         return {
+            'type': data.get('type'),
             'area': data.get('area'),
             'bedrooms': data.get('bedrooms'),
             'bathrooms': data.get('bathrooms'),
@@ -167,13 +171,16 @@ class QuintoAndarPropertyPage(WebPage):
 
     @property
     def text_details(self):
+        data = self.json_data
         return QuintoAndarTextDetails(
             name=self.name,
             # description=self.description,
             owner_description=self.owner_description,
             features=self.features,
-            construction_year=self.json_data.get('constructionYear'),
-            publication_date=self.publication_date
+            construction_year=data.get('constructionYear'),
+            publication_date=self.publication_date,
+            for_rent=data.get('forRent'),
+            for_sale=data.get('forSale'),
         )
 
     @property
@@ -190,7 +197,7 @@ class QuintoAndarPropertyPage(WebPage):
         for photo in data['photos']:
             subtitle = photo.get('subtitle')
             if subtitle is not None:
-                yield {subtitle: img_url + photo['url']}
+                yield {str(subtitle): img_url + photo['url']}
 
     @property
     def publication_date(self):
@@ -248,27 +255,31 @@ class VRZapPropertyHit:
             'street': [address.get('street'), address.get('streetNumber')],
             'neighbourhood': address.get('neighbourhood'),
             'city': address.get('city'),
+            'state': address.get('state'),
+            'country': address.get('country'),
             'complement': address.get('complement'),
             'cep': address.get('zipCode'),
             'zone': address.get('zone'),
-            'location': address.get('point')
+            'lat': address.get('point', {}).get('lat'),
+            'lon': address.get('point', {}).get('lon')
         }
 
     @property
     def prices(self) -> dict:
         prices = self.listing['pricingInfos']
         for price in prices:
-            if price.get('businessType') == 'RENTAL':
-                return {
-                    'rent': price.get('price'),
-                    'condominium': price.get('monthlyCondoFee'),
-                    'iptu': price.get('yearlyIptu'),
-                    'total': [price.get('price'), price.get('monthlyCondoFee'), price.get('yearlyIptu')]
-                }
+            yield {
+                'rent': price.get('price'),
+                'condominium': price.get('monthlyCondoFee'),
+                'iptu': price.get('yearlyIptu'),
+                'total': [price.get('price'), price.get('monthlyCondoFee'), price.get('yearlyIptu')],
+                'type':  price.get('businessType')
+            }
 
     @property
     def details(self) -> dict:
         return {
+            'type': self.listing.get('unitTypes'),
             'area': self.listing.get('totalAreas') or self.listing.get('usableAreas'),
             'bedrooms': self.listing.get('bedrooms'),
             'suites': self.listing.get('suites'),
@@ -282,20 +293,31 @@ class VRZapPropertyHit:
             'description': self.listing.get('description'),
             'features': self.listing.get('amenities'),
             'title': self.listing.get('title'),
-            'contact': self.listing.get('advertiserContact').get('phones'),
-            'type': self.listing.get('unitTypes')
+            'contact': self.listing.get('advertiserContact').get('phones')
         }
 
     @property
     def media(self) -> dict:
         return {
-            'images': self.medias,
-            'video': self.medias
+            'images': list(self.medias),
+            'video': list(self.medias)
         }
+
+    @property
+    def images(self, image_key='IMAGE', width=870, height=653, action='fit-in', description='{description}'):
+        for media in self.medias:
+            if media.get('type') == image_key:
+                yield media.get('url').format(width=width, height=height, action=action, description=description)
+
+    @property
+    def video(self, video_key='VIDEO'):
+        for media in self.medias:
+            if media.get('type') == video_key:
+                yield media.get('url')
 
     def to_item(self):
         address_hash = tuple(self.address.items())
-        prices_hash = tuple(self.prices.items())
+        prices_hash = tuple(self.prices)
         serialized_data = json.dumps(address_hash + prices_hash).encode('utf-8')
         return {'id': hashlib.md5(serialized_data).hexdigest()}
 
@@ -322,7 +344,7 @@ class VRZapListPage(WebPage):
             item = VRZapProperty(
                 code=property.id,
                 address=property.address,
-                prices=property.prices,
+                prices=list(property.prices),
                 details=property.details,
                 text_details=property.text_details,
                 media=property.media,
