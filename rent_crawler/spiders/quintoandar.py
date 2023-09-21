@@ -46,12 +46,13 @@ class QuintoAndarSpider(scrapy.Spider):
             yield response.follow(
                 url=url,
                 callback=self.parse_property_page,
+                dont_filter=True,
                 meta=hit.to_item(),
-                cb_kwargs=dict(index=i, total=len(page.property_urls))
+                cb_kwargs=dict(index=i, total=len(page.property_urls), page_number=kwargs['page_number'])
             )
 
     def parse_property_page(self, response, page: QuintoAndarPropertyPage, **kwargs):
-        self.logger.info('Scraping property page %d/%d', kwargs['index'], kwargs['total'])
+        self.logger.info('Scraping property page %d/%d [%d]', kwargs['index'], kwargs['total'], kwargs['page_number'])
 
         try:
             return page.to_item()
@@ -60,30 +61,30 @@ class QuintoAndarSpider(scrapy.Spider):
 
 
 QUINTO_ANDAR_DATA = '''{{
-                "business_context": "RENT",
+                "business_context": "SALE",
                 "search_query_context": "neighborhood",
                 "filters": {{
                     "map": {{
-                        "bounds_north": -23.60941183774316,
-                        "bounds_south": -23.627263354236998,
-                        "bounds_east": -46.61901770781251,
-                        "bounds_west": -46.65197669218751,
-                        "center_lat": -23.618337595990077,
-                        "center_lng": -46.63549720000001
+                      "bounds_north": -23.58335527073821,
+                      "bounds_south": -23.61030472926179,
+                      "bounds_east": -46.702648775242174,
+                      "bounds_west": -46.7320572247578,
+                      "center_lat": -23.59683,
+                      "center_lng": -46.717353
                     }},
                     "availability": "any",
                     "occupancy": "any",
                     "country_code": "BR",
                     "keyword_match": [
-                      "neighborhood:Saúde"
+                      "neighborhood:Morumbi"
                     ],
                     "sorting": {{
-                        "criteria": "relevance_rent",
+                        "criteria": "relevance_sale",
                         "order": "desc"
                     }},
                     "page_size": {page_size},
                     "offset": {offset},
-                    "search_dropdown_value": "Saúde, São Paulo - SP, Brasil"
+                    "search_dropdown_value": "Morumbi, São Paulo - SP, Brasil"
                 }},
                 "return": [
                     "id",
