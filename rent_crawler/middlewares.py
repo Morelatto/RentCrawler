@@ -42,13 +42,13 @@ class RedisKeySpiderMiddleware:
 
         return output
 
-    def process_spider_output(self, response, result, _):
+    def process_spider_output(self, response, result, spider):
         for r in result:
             process_result = self._process_spider_output(r, response)
             if process_result:
                 yield process_result
 
-    async def process_spider_output_async(self, response, result, _):
+    async def process_spider_output_async(self, response, result, spider):
         async for r in result:
             process_result = self._process_spider_output(r, response)
             if process_result:
