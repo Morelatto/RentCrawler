@@ -1,0 +1,19 @@
+{
+  "data": {
+    "method": "POST",
+    "url": "https://www.quintoandar.com.br/api/yellow-pages/v2/search",
+    "headers": {
+      "Accept": "application/p_click_version.V3.4+p_click_sale_version.V1+json",
+      "Accept-Language": "en-US,en;q=0.5",
+      "Accept-Encoding": "gzip, deflate, br",
+      "Content-Type": "text/plain;charset=UTF-8",
+      "Origin": "https://www.quintoandar.com.br"
+    },
+    "body": "{\"filters\":{\"map\":{\"bounds_north\":-23.32594117897012,\"bounds_south\":-23.77509882102988,\"bounds_east\":-46.38832524076095,\"bounds_west\":-46.87829275923901,\"center_lat\":-23.55052,\"center_lng\":-46.633309},\"availability\":\"any\",\"occupancy\":\"any\",\"blocklist\":[\"892826213\",\"892906909\",\"892909718\",\"892978907\",\"892831357\",\"892964177\",\"894233175\",\"892862180\",\"894255285\",\"893279009\",\"894255892\"],\"country_code\":\"BR\",\"keyword_match\":[\"city:São Paulo\"],\"sorting\":{\"criteria\":\"relevance_rent\",\"order\":\"desc\"},\"page_size\":12,\"offset\":0,\"search_dropdown_value\":\"São Paulo, SP, Brasil\"},\"return\":[\"id\",\"coverImage\",\"rent\",\"totalCost\",\"salePrice\",\"iptuPlusCondominium\",\"area\",\"imageList\",\"imageCaptionList\",\"address\",\"regionName\",\"city\",\"visitStatus\",\"activeSpecialConditions\",\"type\",\"forRent\",\"forSale\",\"isPrimaryMarket\",\"bedrooms\",\"parkingSpaces\",\"listingTags\",\"yield\",\"yieldStrategy\",\"neighbourhood\",\"categories\",\"bathrooms\",\"isFurnished\",\"installations\"],\"business_context\":\"RENT\",\"user_id\":\"oxxHw8yd2aTLkU5WkHkSvWPee4s1mtS7qoa3VpizMLeiK_IA6ZvpcQ\",\"device_id\":\"oxxHw8yd2aTLkU5WkHkSvWPee4s1mtS7qoa3VpizMLeiK_IA6ZvpcQ\",\"search_id\":\"07399335-ef46-477f-a3c9-a40436efacf9\",\"relax_query\":true,\"force_raw_search\":false,\"search_query_context\":\"city\"}"
+  },
+  "params": {
+    "page_start": 1,
+    "total_pages": 10,
+    "page_size": 100
+  }
+}
