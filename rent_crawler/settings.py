@@ -4,67 +4,59 @@ BOT_NAME = "rent_crawler"
 SPIDER_MODULES = ["rent_crawler.spiders"]
 NEWSPIDER_MODULE = "rent_crawler.spiders"
 
-CONCURRENT_REQUESTS_PER_DOMAIN = 1
-DOWNLOAD_DELAY = 2
+CONCURRENT_REQUESTS_PER_DOMAIN = 2
 
 AUTOTHROTTLE_ENABLED = True
-AUTOTHROTTLE_START_DELAY = 2.5
-AUTOTHROTTLE_MAX_DELAY = 10
-AUTOTHROTTLE_DEBUG = True
+AUTOTHROTTLE_START_DELAY = 1
+AUTOTHROTTLE_MAX_DELAY = 3
+AUTOTHROTTLE_DEBUG = False
 
-COOKIES_ENABLED = False
+COOKIES_ENABLED = True
 TELNETCONSOLE_ENABLED = False
 
-SCRAPY_POET_PROVIDERS = {
-    "rent_crawler.providers.BodyJsonProvider": 500,
-}
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+DUPEFILTER_CLASS = "rent_crawler.dupefilter.RedisDupeFilter"
+DUPEFILTER_DEBUG = True
+SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.PriorityQueue'
+SCHEDULER_PERSIST = True
 
 DOWNLOADER_MIDDLEWARES = {
-    # "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
-    # "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
-    # "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 400,
-    # "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 401,
+    "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
+    "scrapy.downloadermiddlewares.retry.RetryMiddleware": None,
+    "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 400,
+    "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 401,
     'scrapy_poet.InjectionMiddleware': 543,
 }
 
-SPIDER_MIDDLEWARES = {
-    'rent_crawler.middlewares.RedisKeySpiderMiddleware': 600,
-}
-
-USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 "
-    "Safari/601.3.9"
-)
-
-# FAKEUSERAGENT_PROVIDERS = [
-#     "scrapy_fake_useragent.providers.FakeUserAgentProvider",
-#     "scrapy_fake_useragent.providers.FakerProvider",
-#     "scrapy_fake_useragent.providers.FixedUserAgentProvider",
-# ]
-
-DUPEFILTER_DEBUG = True
+FAKEUSERAGENT_PROVIDERS = [
+    "scrapy_fake_useragent.providers.FakeUserAgentProvider",
+    "scrapy_fake_useragent.providers.FakerProvider",
+]
 
 ITEM_PIPELINES = {
-    "rent_crawler.pipelines.MongoDBPipeline": 100
+    "rent_crawler.pipelines.RentItemPipeline": 100,
 }
 
 MONGODB_URI = 'mongodb://root:pass@localhost:27017'
 MONGODB_DATABASE = 'rent'
 MONGODB_UNIQUE_KEY = 'code'
-MONGODB_ADD_TIMESTAMP = True
-MONGODB_SEPARATE_COLLECTIONS = True
 
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
-#REDIS_PASSWORD = "root"
+REDIS_START_URLS_KEY = '%(name)s:start_urls'
 
 LOG_FORMATTER = "rent_crawler.loggers.SpiderLogFormatter"
-# LOG_FILE = 'spider_log.txt'
-# LOG_STDOUT = True
+LOG_STDOUT = True
 LOG_LEVEL = 'DEBUG'
 
-# HTTPERROR_ALLOW_ALL = True
+FEED_EXPORT_ENCODING = 'utf-8'
+
+SCRAPY_POET_PROVIDERS = {
+    "rent_crawler.providers.BodyJsonProvider": 500,
+}
 
 REQUEST_FINGERPRINTER_IMPLEMENTATION = '2.7'
 
-FEED_EXPORT_ENCODING = 'utf-8'
+EXTENSIONS = {
+    'rent_crawler.extensions.RedisStatsExporter': 500,
+}
