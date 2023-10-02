@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from itemloaders import Identity
-from itemloaders.processors import MapCompose, Join, Compose
+from itemloaders.processors import Compose, MapCompose, TakeFirst
 from scrapy import Item, Field
 from w3lib.html import replace_tags
 
@@ -16,21 +15,18 @@ def process_float_or_int(value):
 
 
 parse_float_or_int = MapCompose(lambda x: process_float_or_int(x))
-sum_numbers = Compose(lambda v: sum(v))
 strip = MapCompose(str.strip, replace_tags, lambda text: text if text != '' else None)
-filter_images = MapCompose(lambda media: media.get('url') if media.get('type') == 'IMAGE' else None)
-filter_videos = MapCompose(lambda media: media.get('url') if media.get('type') == 'VIDEO' else None)
-format_vrzap_image_url = MapCompose(
-    lambda img: img.format(width=870, height=653, action='fit-in', description='{description}'))
-remove_source = MapCompose(lambda location: location if location.pop('source', None) else location)
 bigger_than_zero = MapCompose(parse_float_or_int, lambda v: v if v > 0 else None)
+sum_numbers = Compose(bigger_than_zero, lambda v: sum(v))
 
 
 class Address(Item):
-    street = Field(output_processor=Join(', '))
+    street = Field()
     region = Field()
     neighbourhood = Field()
     city = Field()
+    state = Field()
+    country = Field()
     cep = Field()
     lat = Field()
     lng = Field()
@@ -45,11 +41,15 @@ class Details(Item):
     suites = Field()
 
 
+class TextDetails(Item):
+    features = Field()
+
+
 class Prices(Item):
     rent = Field()
     condominium = Field()
     iptu = Field()
-    total = Field(output_processor=sum_numbers)
+    total = Field()
 
 
 class Media(Item):
@@ -66,59 +66,57 @@ class RentalProperty(Item):
     url = Field()
 
 
-class TextDetails(Item):
-    type = Field()
-    features = Field(output_processor=Identity())
-
-
-'''VR/ZAP'''
-
-
 class VRZapAddress(Address):
+    street = Field()
     complement = Field()
     zone = Field()
-    location = Field(input_processor=remove_source)
+
+
+class VRZapPrice(Prices):
+    rent = Field(output_processor=TakeFirst())
+    condominium = Field(output_processor=TakeFirst())
+    iptu = Field(output_processor=TakeFirst())
+    total = Field(output_processor=sum_numbers)
+    type = Field(output_processor=TakeFirst())
 
 
 class VRZapDetails(Details):
-    area = Field(input_processor=bigger_than_zero)
+    type = Field(output_processor=TakeFirst())
+    area = Field(input_processor=bigger_than_zero, output_processor=TakeFirst())
+    bedrooms = Field(output_processor=TakeFirst())
+    bathrooms = Field(output_processor=TakeFirst())
+    parking = Field(output_processor=TakeFirst())
+    suites = Field(output_processor=TakeFirst())
 
 
 class VRZapTextDetails(TextDetails):
-    description = Field(input_processor=strip)
+    description = Field()
     title = Field()
-    contact = Field(output_processor=Identity())
-
-
-class VRZapMediaDetails(Item):
-    images = Field(input_processor=filter_images, output_processor=format_vrzap_image_url)
-    video = Field(input_processor=filter_videos)
+    contact = Field()
 
 
 class VRZapProperty(RentalProperty):
     address = Field(serializer=VRZapAddress)
-    prices = Field(serializer=Prices)
+    prices = Field(serializer=VRZapPrice)
     details = Field(serializer=VRZapDetails)
     text_details = Field(serializer=VRZapTextDetails)
-    media = Field(serializer=VRZapMediaDetails)
-    url = Field(output_processor=Join(''))
-
-
-'''QUINTO ANDAR'''
+    media = Field(serializer=Media)
+    url = Field()
 
 
 class QuintoAndarPrices(Prices):
     iptu_and_condominium = Field()
     insurance = Field()
     service_fee = Field()
-    total = Field()
+    rent_total = Field()
+    sale_price = Field()
 
 
 class QuintoAndarDetails(Details):
     floor = Field()
-    pet = Field()
-    furniture = Field()
-    subway = Field()
+    allows_pet = Field()
+    is_furnished = Field()
+    is_near_subway = Field()
 
 
 class QuintoAndarTextDetails(TextDetails):
@@ -127,6 +125,8 @@ class QuintoAndarTextDetails(TextDetails):
     owner_description = Field()
     construction_year = Field()
     publication_date = Field()
+    for_rent = Field()
+    for_sale = Field()
 
 
 class QuintoAndarProperty(RentalProperty):
