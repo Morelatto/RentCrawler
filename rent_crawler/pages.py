@@ -5,9 +5,10 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import pytz
+from itemloaders import ItemLoader
 from web_poet import WebPage
 
-from rent_crawler.items import QuintoAndarProperty, QuintoAndarTextDetails, VRZapProperty
+from rent_crawler.items import QuintoAndarProperty, QuintoAndarTextDetails, VRZapProperty, VRZapDetails, VRZapPrice
 from rent_crawler.providers import BodyJson
 
 
@@ -46,7 +47,7 @@ class QuintoAndarPropertyHit:
         address_hash = tuple(self.address.items())
         prices_hash = tuple(self.prices.items())
         serialized_data = json.dumps(address_hash + prices_hash).encode('utf-8')
-        return {'key': hashlib.sha1(serialized_data).hexdigest()}
+        return {'id': hashlib.sha1(serialized_data).hexdigest()}
 
 
 class QuintoAndarListPage(WebPage):
@@ -91,6 +92,8 @@ class QuintoAndarPropertyPage(WebPage):
             'street': address_data.get('street'),
             'neighbourhood': address_data.get('neighborhood'),
             'city': address_data.get('city'),
+            'state': address_data.get('stateName'),
+            'country': address_data.get('countryName'),
             'cep': address_data.get('zipCode'),
             'lat': address_data.get('lat'),
             'lng': address_data.get('lng'),
@@ -106,21 +109,23 @@ class QuintoAndarPropertyPage(WebPage):
             'insurance': data.get('homeProtection'),
             'service_fee': data.get('tenantServiceFee'),
             'total': data.get('totalCost'),
+            'sale_price': data.get('salePrice'),
         }
 
     @property
     def details(self):
         data = self.json_data
         return {
+            'type': data.get('type'),
             'area': data.get('area'),
             'bedrooms': data.get('bedrooms'),
             'bathrooms': data.get('bathrooms'),
             'parking': data.get('parkingSpaces'),
             'floor': data.get('floor'),
-            'pet': data.get('acceptsPets'),
-            'furniture': data.get('hasFurniture'),
+            'allows_pet': data.get('acceptsPets'),
+            'is_furnished ': data.get('hasFurniture'),
             'suites': data.get('suites'),
-            'subway': data.get('isNearSubway'),
+            'is_near_subway': data.get('isNearSubway'),
         }
 
     @property
@@ -167,13 +172,16 @@ class QuintoAndarPropertyPage(WebPage):
 
     @property
     def text_details(self):
+        data = self.json_data
         return QuintoAndarTextDetails(
             name=self.name,
             # description=self.description,
             owner_description=self.owner_description,
             features=self.features,
-            construction_year=self.json_data.get('constructionYear'),
-            publication_date=self.publication_date
+            construction_year=data.get('constructionYear'),
+            publication_date=self.publication_date,
+            for_rent=data.get('forRent'),
+            for_sale=data.get('forSale'),
         )
 
     @property
@@ -190,7 +198,7 @@ class QuintoAndarPropertyPage(WebPage):
         for photo in data['photos']:
             subtitle = photo.get('subtitle')
             if subtitle is not None:
-                yield {subtitle: img_url + photo['url']}
+                yield {str(subtitle): img_url + photo['url']}
 
     @property
     def publication_date(self):
@@ -245,36 +253,43 @@ class VRZapPropertyHit:
     def address(self) -> dict:
         address = self.listing.get('address')
         return {
-            'street': [address.get('street'), address.get('streetNumber')],
-            'neighbourhood': address.get('neighbourhood'),
-            'city': address.get('city'),
+            'street': address.get('street'),
+            'street_number': address.get('streetNumber'),
             'complement': address.get('complement'),
             'cep': address.get('zipCode'),
+            'neighbourhood': address.get('neighborhood'),
             'zone': address.get('zone'),
-            'location': address.get('point')
+            'city': address.get('city'),
+            'state': address.get('state'),
+            'country': address.get('country'),
+            'lat': address.get('point', {}).get('lat'),
+            'lon': address.get('point', {}).get('lon')
         }
 
     @property
     def prices(self) -> dict:
         prices = self.listing['pricingInfos']
         for price in prices:
-            if price.get('businessType') == 'RENTAL':
-                return {
-                    'rent': price.get('price'),
-                    'condominium': price.get('monthlyCondoFee'),
-                    'iptu': price.get('yearlyIptu'),
-                    'total': [price.get('price'), price.get('monthlyCondoFee'), price.get('yearlyIptu')]
-                }
+            loader = ItemLoader(item=VRZapPrice())
+            loader.add_value('rent', price.get('price'))
+            loader.add_value('condominium', price.get('monthlyCondoFee'))
+            loader.add_value('iptu', price.get('yearlyIptu'))
+            loader.add_value('total', price.get('price', 0))
+            loader.add_value('total', price.get('monthlyCondoFee', 0))
+            loader.add_value('total', price.get('yearlyIptu', 0))
+            loader.add_value('type', price.get('businessType'))
+            yield loader.load_item()
 
     @property
     def details(self) -> dict:
-        return {
-            'area': self.listing.get('totalAreas') or self.listing.get('usableAreas'),
-            'bedrooms': self.listing.get('bedrooms'),
-            'suites': self.listing.get('suites'),
-            'bathrooms': self.listing.get('bathrooms'),
-            'parking': self.listing.get('parkingSpaces')
-        }
+        loader = ItemLoader(item=VRZapDetails())
+        loader.add_value('type', self.listing.get('unitTypes'))
+        loader.add_value('area', self.listing.get('totalAreas') or self.listing.get('usableAreas'))
+        loader.add_value('bedrooms', self.listing.get('bedrooms'))
+        loader.add_value('suites', self.listing.get('suites'))
+        loader.add_value('bathrooms', self.listing.get('bathrooms'))
+        loader.add_value('parking', self.listing.get('parkingSpaces'))
+        return loader.load_item()
 
     @property
     def text_details(self) -> dict:
@@ -282,20 +297,31 @@ class VRZapPropertyHit:
             'description': self.listing.get('description'),
             'features': self.listing.get('amenities'),
             'title': self.listing.get('title'),
-            'contact': self.listing.get('advertiserContact').get('phones'),
-            'type': self.listing.get('unitTypes')
+            'contact': self.listing.get('advertiserContact').get('phones')
         }
 
     @property
     def media(self) -> dict:
         return {
-            'images': self.medias,
-            'video': self.medias
+            'images': list(self.images),
+            'video': list(self.video)
         }
+
+    @property
+    def images(self, image_key='IMAGE', width=870, height=653, action='fit-in', description='{description}'):
+        for media in self.medias:
+            if media.get('type') == image_key:
+                yield media.get('url').format(width=width, height=height, action=action, description=description)
+
+    @property
+    def video(self, video_key='VIDEO'):
+        for media in self.medias:
+            if media.get('type') == video_key:
+                yield media.get('url')
 
     def to_item(self):
         address_hash = tuple(self.address.items())
-        prices_hash = tuple(self.prices.items())
+        prices_hash = tuple(self.prices)
         serialized_data = json.dumps(address_hash + prices_hash).encode('utf-8')
         return {'id': hashlib.md5(serialized_data).hexdigest()}
 
@@ -322,10 +348,10 @@ class VRZapListPage(WebPage):
             item = VRZapProperty(
                 code=property.id,
                 address=property.address,
-                prices=property.prices,
+                prices=list(property.prices),
                 details=property.details,
                 text_details=property.text_details,
                 media=property.media,
-                url=property.url
+                url=f'https://vivareal.com.br{property.url}'
             )
             yield item
