@@ -1,115 +1,60 @@
 import scrapy
 
-from rent_crawler.pages import QuintoAndarListPage, QuintoAndarPropertyPage
+from rent_crawler.pages import QuintoAndarPropertyHit, QuintoAndarListPage, QuintoAndarPropertyPage
+from rent_crawler.spiders import PageCrawlSpider, PageCrawlParams
 
-PAGE_SIZE = 11
 
-
-class QuintoAndarSpider(scrapy.Spider):
+class QuintoAndarSpider(PageCrawlSpider):
     name = 'quinto_andar'
-    start_url = 'https://www.quintoandar.com.br/api/yellow-pages/v2/search'
-    headers = {
-        'Accept': 'application/pclick_sale.v0+json'
-    }
+    url = 'https://quintoandar.com.br'
 
-    def __init__(self, start=1, pages=1, *args, **kwargs):
-        """
-        Initialize the crawler with the given parameters.
+    @classmethod
+    def _build_body_for_request(cls, body: dict, page_index: int, page_size: int):
+        page_offset = (page_index - 1) * page_size
+        body['filters']['page_size'] = page_size
+        body['filters']['offset'] = page_offset
+        return body
 
-        Args:
-            start (int): The starting page number.
-            pages (int): The number of pages to crawl.
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
-        """
-        super().__init__(*args, **kwargs)
-        self.start_page = int(start)
-        self.pages_to_crawl = int(pages)
-
-    def start_requests(self):
-        self.logger.info('Starting crawl of %d pages', self.pages_to_crawl)
-
-        for page in range(self.start_page, self.start_page + self.pages_to_crawl):
-            offset = (page - 1) * PAGE_SIZE
-            data = QUINTO_ANDAR_DATA.format(page_size=PAGE_SIZE, offset=offset)
+    def start_request(self, params: PageCrawlParams):
+        start, total = params.page_data.get('page_start'), params.page_data.get('total_pages')
+        for page in range(start, start + total):
+            params.body = self._build_body_for_request(
+                body=params.body,
+                page_index=page,
+                page_size=params.page_data.get('page_size')
+            )
             yield scrapy.Request(
-                url=self.start_url,
-                method='POST',
-                headers=self.headers,
-                body=data,
-                cb_kwargs=dict(page_number=page, total_pages=self.pages_to_crawl)
+                **params.request_data,
+                dont_filter=True,
+                cb_kwargs={'page_number': page, 'total_pages': total}
             )
 
-    def parse(self, response: scrapy.http.Response, page: QuintoAndarListPage, **kwargs):
+    def page_request(self, params):
+        page = QuintoAndarPropertyHit(**params.request_data.get('hit'))
+        return scrapy.Request(
+            url=self.url + params.request_data.get('url'),
+            callback=self.parse_page,
+            meta=page.to_item(),
+            cb_kwargs=params.page_data
+        )
+
+    def parse(self, response, page: QuintoAndarListPage, **kwargs):
         self.logger.info('Scraping page %d/%d', kwargs['page_number'], kwargs['total_pages'])
         for i, (url, hit) in enumerate(zip(page.property_urls, page.properties), start=1):
-            yield response.follow(
-                url=url,
-                callback=self.parse_property_page,
-                meta=hit.to_item(),
-                cb_kwargs=dict(index=i, total=len(page.property_urls))
-            )
+            yield {
+                'data': {
+                    'url': url,
+                    'hit': hit
+                },
+                'params': {
+                    'page_size': len(page.property_urls),
+                    'page_number': kwargs['page_number'],
+                    'total_pages': kwargs['total_pages'],
+                }
+            }
 
-    def parse_property_page(self, response, page: QuintoAndarPropertyPage, **kwargs):
-        self.logger.info('Scraping property page %d/%d', kwargs['index'], kwargs['total'])
-
+    def parse_page(self, response, page: QuintoAndarPropertyPage, **kwargs):
         try:
             return page.to_item()
         except Exception as e:
             self.logger.exception("An error occurred for url %s", response.url, e)
-
-
-QUINTO_ANDAR_DATA = '''{{
-                "business_context": "RENT",
-                "search_query_context": "neighborhood",
-                "filters": {{
-                    "map": {{
-                        "bounds_north": -23.60941183774316,
-                        "bounds_south": -23.627263354236998,
-                        "bounds_east": -46.61901770781251,
-                        "bounds_west": -46.65197669218751,
-                        "center_lat": -23.618337595990077,
-                        "center_lng": -46.63549720000001
-                    }},
-                    "availability": "any",
-                    "occupancy": "any",
-                    "country_code": "BR",
-                    "keyword_match": [
-                      "neighborhood:Saúde"
-                    ],
-                    "sorting": {{
-                        "criteria": "relevance_rent",
-                        "order": "desc"
-                    }},
-                    "page_size": {page_size},
-                    "offset": {offset},
-                    "search_dropdown_value": "Saúde, São Paulo - SP, Brasil"
-                }},
-                "return": [
-                    "id",
-                    "coverImage",
-                    "rent",
-                    "totalCost",
-                    "salePrice",
-                    "iptuPlusCondominium",
-                    "area",
-                    "imageList",
-                    "imageCaptionList",
-                    "address",
-                    "regionName",
-                    "city",
-                    "visitStatus",
-                    "activeSpecialConditions",
-                    "type",
-                    "forRent",
-                    "forSale",
-                    "isPrimaryMarket",
-                    "bedrooms",
-                    "parkingSpaces",
-                    "listingTags",
-                    "yield",
-                    "yieldStrategy",
-                    "neighbourhood",
-                    "categories"
-                ]
-            }}'''
